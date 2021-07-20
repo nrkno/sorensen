@@ -1,0 +1,8 @@
+{
+  "name": "simonsson",
+  "version": "0.0.0",
+  "description": "A modern, i18n-friendly hotkey library for the Web",
+  "main": "index.js",
+  "author": "Jan Starzak <jan.starzak@nrk.no>",
+  "license": "MIT"
+}
