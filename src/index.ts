@@ -242,7 +242,11 @@ function keyDown(e: KeyboardEvent) {
 
 async function getKeyboardLayoutMap() {
 	if ('keyboard' in navigator && typeof navigator.keyboard.getLayoutMap === 'function') {
-		keyboardLayoutMap = await navigator.keyboard.getLayoutMap()
+		try {
+			keyboardLayoutMap = await navigator.keyboard.getLayoutMap()
+		} catch (e) {
+			console.error('Could not get keyboard layout map.')
+		}
 	}
 }
 
@@ -295,9 +299,7 @@ async function init() {
 			passive: false,
 		})
 		window.addEventListener('layoutchange', () => {
-			getKeyboardLayoutMap().catch((reason) => {
-				throw new Error(reason)
-			})
+			getKeyboardLayoutMap().catch(console.error)
 		})
 		await getKeyboardLayoutMap()
 

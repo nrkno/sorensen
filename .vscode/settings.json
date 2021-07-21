@@ -1,0 +1,7 @@
+{
+	"javascript.suggest.autoImports": false,
+	"javascript.suggest.includeCompletionsForImportStatements": false,
+	"javascript.suggest.completeFunctionCalls": false,
+	"javascript.suggest.names": false,
+	"javascript.suggest.enabled": false
+}

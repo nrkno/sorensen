@@ -1,2 +1,54 @@
 <!DOCTYPE html>
 <script src="simonsson.js"></script>
+<style>
+	#result .binding {
+		display: flex;
+	}
+	#result .binding .combo,
+	#result .binding .hit {
+		flex: 1 1;
+	}
+	#result .binding .hit.hot {
+		background-color: black;
+		font-weight: bold;
+		color: white;
+	}
+</style>
+<template id="binding">
+	<div class="binding">
+		<div class="combo">
+			<!-- Key combination -->
+		</div>
+		<div class="hit">
+			<!-- Was activated? -->
+		</div>
+	</div>
+</template>
+<p id="mounted">Not initialized</p>
+<div id="result"></div>
+<script>
+	const bindings = []
+	Simonsson.init().then(() => {
+		document.getElementById('mounted').textContent = 'Simonsson initialized'
+	})
+
+	const bindCombo = (combo, options, clb) => {
+		const template = document.getElementById('binding')
+		const bindRow = template.content.cloneNode(true)
+		bindRow.querySelector('.combo').textContent = combo
+		bindRow.querySelector('.hit').textContent = 'No'
+		document.getElementById('result').appendChild(bindRow)
+		const inserted = document.getElementById('result').lastElementChild
+		Simonsson.bind(
+			combo,
+			() => {
+				const hitCell = inserted.querySelector('.hit')
+				hitCell.textContent = 'Yes'
+				hitCell.classList.add('hot')
+				if (typeof clb === 'function') clb()
+			},
+			options
+		)
+	}
+	window.bindCombo = bindCombo
+</script>
