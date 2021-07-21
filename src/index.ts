@@ -43,7 +43,7 @@ interface BindOptions {
 /**
  * Special meta-codes that can be used to match for "any" modifer key, like matching for both ShiftLeft and ShiftRight.
  */
-export const VIRTUAL_ANY_POSITION_KEYS = {
+export const VIRTUAL_ANY_POSITION_KEYS: Record<string, string[]> = {
 	Shift: ['ShiftLeft', 'ShiftRight'],
 	Control: ['ControlLeft', 'ControlRight'],
 	Ctrl: ['ControlLeft', 'ControlRight'],
@@ -111,31 +111,60 @@ function unbind(combo: string, listener?: (e: EnchancedKeyboardEvent) => void): 
 }
 
 function matchNote(combo: Note, options?: BindOptions): boolean {
-	let isMatch = true
 	if (!options?.ordered) {
 		for (let i = 0; i < combo.length; i++) {
-			if (!keysDown.includes(combo[i])) {
-				isMatch = false
-				break // break iterations as soon as possible
+			const code = combo[i]
+			if (code in VIRTUAL_ANY_POSITION_KEYS) {
+				const alternatives = VIRTUAL_ANY_POSITION_KEYS[code]
+				let anyMatch = false
+				for (let j = 0; j < alternatives.length; j++) {
+					if (keysDown.includes(alternatives[j])) {
+						anyMatch = true
+						break
+					}
+				}
+				if (!anyMatch) {
+					return false
+				}
+			} else {
+				if (!keysDown.includes(code)) {
+					return false // break iterations as soon as possible
+				}
 			}
 		}
 	} else {
 		let lastFound = -1
 		for (let i = 0; i < combo.length; i++) {
-			const idx = keysDown.indexOf(combo[i])
-			if (idx < 0 || idx < lastFound) {
-				isMatch = false
-				break // break iterations as soon as possible
+			const code = combo[i]
+			if (code in VIRTUAL_ANY_POSITION_KEYS) {
+				const alternatives = VIRTUAL_ANY_POSITION_KEYS[code]
+				let anyMatch = false
+				for (let j = 0; j < alternatives.length; j++) {
+					const idx = keysDown.indexOf(alternatives[j])
+					if (idx >= 0 && idx >= lastFound) {
+						anyMatch = true
+						lastFound = idx
+						break
+					}
+				}
+				if (!anyMatch) {
+					return false
+				}
+			} else {
+				const idx = keysDown.indexOf(combo[i])
+				if (idx < 0 || idx < lastFound) {
+					return false // break iterations as soon as possible
+				}
+				lastFound = idx
 			}
-			lastFound = idx
 		}
 	}
 
 	if (options?.exclusive && keysDown.length !== combo.length) {
-		isMatch = false
+		return false
 	}
 
-	return isMatch
+	return true
 }
 
 function visitBoundCombos(_key: string, up: boolean, _e: KeyboardEvent) {
