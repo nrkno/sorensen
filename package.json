@@ -2,7 +2,34 @@
   "name": "simonsson",
   "version": "0.0.0",
   "description": "A modern, i18n-friendly hotkey library for the Web",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "author": "Jan Starzak <jan.starzak@nrk.no>",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "start": "webpack serve",
+    "build": "yarn bundle",
+    "lint": "eslint . --ext .ts --ext .js --ext .tsx --ext .jsx --ignore-pattern dist",
+    "lint-fix": "yarn lint --fix",
+    "format": "prettier --write --config \"./.prettierrc.json\" \"src/**\"",
+    "bundle": "rimraf dist && yarn bundle:main",
+    "bundle:main": "webpack",
+    "license-validate": "yarn sofie-licensecheck",
+    "validate:dependencies": "yarn audit --groups dependencies && yarn license-validate",
+    "validate:dev-dependencies": "yarn audit --groups devDependencies"
+  },
+  "devDependencies": {
+    "@sofie-automation/code-standard-preset": "^0.4.2",
+    "rimraf": "^3.0.2",
+    "ts-loader": "8.2.0",
+    "typescript": "4.2.4",
+    "webpack": "5.45.1",
+    "webpack-cli": "4.5.0",
+    "webpack-dev-server": "3.11.2",
+    "yargs": "^17.0.1"
+  },
+  "prettier": "@sofie-automation/code-standard-preset/.prettierrc.json",
+  "resolutions": {
+    "webpack-dev-server/**/glob-parent": "^5.1.2"
+  }
 }

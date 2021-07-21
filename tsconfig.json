@@ -1,0 +1,11 @@
+{
+	"extends": "./tsconfig.build.json",
+	"include": ["src/**/*.ts"],
+	"exclude": ["node_modules/**"],
+	"compilerOptions": {
+		"sourceMap": true,
+		"module": "UMD",
+		"lib": ["dom", "es6", "es2016"],
+		"types": []
+	}
+}
