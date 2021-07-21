@@ -24,12 +24,13 @@
 		</div>
 	</div>
 </template>
+<h1>Simonsson test playground</h1>
 <p id="mounted">Not initialized</p>
 <div id="result"></div>
 <script>
 	const bindings = []
 	Simonsson.init().then(() => {
-		document.getElementById('mounted').textContent = 'Simonsson initialized'
+		document.getElementById('mounted').textContent = 'Simonsson is initialized'
 	})
 
 	const bindCombo = (combo, options, clb) => {
@@ -39,6 +40,7 @@
 		bindRow.querySelector('.hit').textContent = 'No'
 		document.getElementById('result').appendChild(bindRow)
 		const inserted = document.getElementById('result').lastElementChild
+		inserted.dataset['combo'] = combo
 		Simonsson.bind(
 			combo,
 			() => {
@@ -50,5 +52,12 @@
 			options
 		)
 	}
+
+	const resetState = (combo) => {
+		document.querySelector(`.binding[data-combo="${combo}"] .hit`).textContent = 'No'
+		document.querySelector(`.binding[data-combo="${combo}"] .hit`).classList.remove('hot')
+	}
+
 	window.bindCombo = bindCombo
+	window.resetState = resetState
 </script>

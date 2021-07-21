@@ -20,7 +20,6 @@ module.exports = {
 		? {
 			minimize: false,
 			moduleIds: 'named',
-			mangleExports: false,
 		}
 		: undefined,
 	resolve: {
@@ -47,7 +46,7 @@ module.exports = {
 		],
 		compress: true,
 		port: 9000,
-		open: true,
+		open: env === 'test' ? false : true,
 		openPage: 'index.html',
 		watchContentBase: true,
 		filename: 'index.js'

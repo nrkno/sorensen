@@ -1,11 +1,12 @@
 {
 	"extends": "./tsconfig.build.json",
-	"include": ["src/**/*.ts", "cypress/**/*.ts"],
+	"include": ["src/**/*.ts", "src/__tests__/**/*.ts"],
 	"exclude": ["node_modules/**"],
 	"compilerOptions": {
 		"sourceMap": true,
 		"module": "UMD",
 		"lib": ["dom", "es6", "es2016"],
-		"types": ["cypress"]
+		"types": ["jest", "@types/jest-environment-puppeteer"],
+		"esModuleInterop": true
 	}
 }

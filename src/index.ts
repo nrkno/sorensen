@@ -26,7 +26,7 @@ let bound: ComboBinding[] = []
 let chordsInProgress: ChordInProgress[] = []
 let keysDown: string[] = []
 
-interface BindOptions {
+export interface BindOptions {
 	/** Only fire this hotkey if no other keys are pressed. */
 	exclusive?: boolean
 	/**
