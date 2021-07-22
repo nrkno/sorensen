@@ -223,6 +223,17 @@ function matchNote(combo: Note, options?: BindOptions): boolean {
 }
 
 function callListenerIfAllowed(binding: ComboBinding, e: KeyboardEvent, note = 0) {
+	if (
+		!binding.global &&
+		(document.activeElement?.tagName === 'TEXTAREA' || document.activeElement?.tagName === 'INPUT')
+	) {
+		return
+	} else if (typeof binding.global === 'function') {
+		if (!binding.global(e, stringifyCombo(binding.combo))) {
+			return
+		}
+	}
+
 	binding.listener(
 		Object.assign(e, {
 			comboChordCodes: binding.combo,
@@ -370,9 +381,11 @@ async function init() {
 	if (!initialized) {
 		window.addEventListener('keyup', keyUp, {
 			passive: false,
+			capture: true,
 		})
 		window.addEventListener('keydown', keyDown, {
 			passive: false,
+			capture: true,
 		})
 		window.addEventListener('layoutchange', () => {
 			getKeyboardLayoutMap().catch(console.error)

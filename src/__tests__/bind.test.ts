@@ -12,15 +12,73 @@ describe('Simonsson.bind', () => {
 		await resetAllCombos()
 	})
 
-	describe('keyDown', () => {
-		it("KeyA fires when pressing KeyA, and KeyB doesn't fire", async () => {
-			await bindCombo('KeyA')
-			await bindCombo('KeyB')
-			await expectToTrigger('KeyA', false)
-			await expectToTrigger('KeyB', false)
-			await page.keyboard.press('KeyA')
-			await expectToTrigger('KeyA', true)
-			await expectToTrigger('KeyB', false)
+	describe('keydown', () => {
+		describe('basics', () => {
+			beforeAll(async () => {
+				await bindCombo('KeyA')
+				await bindCombo('KeyB')
+			})
+
+			it('KeyA fires when pressing KeyA', async () => {
+				await expectToTrigger('KeyA', false)
+				await page.keyboard.press('KeyA')
+				await expectToTrigger('KeyA', true)
+			})
+
+			it('KeyA fires on keydown', async () => {
+				await expectToTrigger('KeyA', false)
+				await page.keyboard.down('KeyA')
+				await expectToTrigger('KeyA', true)
+				await page.keyboard.up('KeyA')
+			})
+
+			it("KeyA doesn't fire on KeyB", async () => {
+				await expectToTrigger('KeyA', false)
+				await page.keyboard.down('KeyB')
+				await expectToTrigger('KeyA', false)
+				await page.keyboard.up('KeyB')
+			})
+
+			it("KeyA doesn't fire when holding Shift", async () => {
+				await expectToTrigger('KeyA', false)
+				await page.keyboard.down('ShiftLeft')
+				await page.keyboard.down('KeyA')
+				await expectToTrigger('KeyA', false)
+				await page.keyboard.up('ShiftLeft')
+				await page.keyboard.up('KeyA')
+			})
+
+			describe('global', () => {
+				beforeAll(async () => {
+					await bindCombo('KeyY')
+					await bindCombo('KeyZ', {
+						global: true,
+					})
+				})
+				it("KeyY doesn't fire when inside an input element", async () => {
+					await page.focus('input')
+					await page.waitForTimeout(5000)
+					await expectToTrigger('KeyY', false)
+					await page.waitForTimeout(5000)
+					await page.keyboard.down('KeyY')
+					await page.waitForTimeout(5000)
+					await expectToTrigger('KeyY', false)
+					await page.waitForTimeout(5000)
+					await page.keyboard.up('KeyY')
+				})
+
+				it('KeyZ fires when inside a textarea element', async () => {
+					await page.focus('textarea')
+					await expectToTrigger('KeyZ', false)
+					await page.keyboard.down('KeyZ')
+					await expectToTrigger('KeyZ', true)
+					await page.keyboard.up('KeyZ')
+				})
+
+				afterAll(async () => {
+					await page.focus('button')
+				})
+			})
 		})
 
 		describe('combinations', () => {
@@ -211,6 +269,41 @@ describe('Simonsson.bind', () => {
 						await page.keyboard.up('KeyB')
 						await page.keyboard.up('ShiftLeft')
 						await page.keyboard.up('ControlLeft')
+					})
+				})
+
+				describe('exclusive: false', () => {
+					beforeAll(async () => {
+						await bindCombo('Ctrl+Shift+KeyA', {
+							ordered: 'modifiersFirst',
+							exclusive: false,
+						})
+					})
+
+					it('Ctrl+Shift+KeyA fires when pressing ControlLeft+ShiftLeft+KeyL+KeyA', async () => {
+						await expectToTrigger('Ctrl+Shift+KeyA', false)
+						await page.keyboard.down('ControlLeft')
+						await page.keyboard.down('ShiftLeft')
+						await page.keyboard.down('KeyL')
+						await page.keyboard.down('KeyA')
+						await expectToTrigger('Ctrl+Shift+KeyA', true)
+						await page.keyboard.up('KeyL')
+						await page.keyboard.up('ControlLeft')
+						await page.keyboard.up('KeyA')
+						await page.keyboard.up('ShiftLeft')
+					})
+
+					it('Ctrl+Shift+KeyA fires when pressing KeyA+ControlLeft+ShiftLeft+KeyL', async () => {
+						await expectToTrigger('Ctrl+Shift+KeyA', false)
+						await page.keyboard.down('KeyL')
+						await page.keyboard.down('ControlLeft')
+						await page.keyboard.down('ShiftLeft')
+						await page.keyboard.down('KeyA')
+						await expectToTrigger('Ctrl+Shift+KeyA', true)
+						await page.keyboard.up('ControlLeft')
+						await page.keyboard.up('KeyA')
+						await page.keyboard.up('ShiftLeft')
+						await page.keyboard.up('KeyL')
 					})
 				})
 			})
