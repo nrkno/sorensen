@@ -243,16 +243,18 @@ function callListenerIfAllowed(binding: ComboBinding, e: KeyboardEvent, note = 0
 }
 
 function visitBoundCombos(_key: string, up: boolean, e: KeyboardEvent) {
+	const chordsInProgressCount = chordsInProgress.filter((chord) => chord.note > 1).length
 	bound.forEach((binding: ComboBinding) => {
 		if (matchNote(binding.combo[0], binding) && (binding.up || false) === up) {
-			if (binding.combo.length === 1) {
-				callListenerIfAllowed(binding, e, 0)
-			} else {
-				console.log('In progress: ' + binding)
-				chordsInProgress.push({
-					binding,
-					note: 1,
-				})
+			if (chordsInProgressCount === 0 || binding.exclusive === false) {
+				if (binding.combo.length === 1) {
+					callListenerIfAllowed(binding, e, 0)
+				} else {
+					chordsInProgress.push({
+						binding,
+						note: 1,
+					})
+				}
 			}
 		}
 	})
