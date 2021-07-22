@@ -57,13 +57,9 @@ describe('Simonsson.bind', () => {
 				})
 				it("KeyY doesn't fire when inside an input element", async () => {
 					await page.focus('input')
-					await page.waitForTimeout(5000)
 					await expectToTrigger('KeyY', false)
-					await page.waitForTimeout(5000)
 					await page.keyboard.down('KeyY')
-					await page.waitForTimeout(5000)
 					await expectToTrigger('KeyY', false)
-					await page.waitForTimeout(5000)
 					await page.keyboard.up('KeyY')
 				})
 
