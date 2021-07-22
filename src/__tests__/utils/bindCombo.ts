@@ -1,5 +1,5 @@
 import expectPuppet from 'expect-puppeteer'
-import { BindOptions } from '../index'
+import { BindOptions } from '../../index'
 
 export async function bindCombo(combo: string, options?: BindOptions) {
 	await page.evaluate<string>(`bindCombo(${JSON.stringify(combo)}, ${JSON.stringify(options || {})})`)
@@ -13,4 +13,8 @@ export async function expectToTrigger(combo: string, yesOrNo: boolean) {
 
 export async function resetCombo(combo: string) {
 	await page.evaluate<string>(`resetState(${JSON.stringify(combo)})`)
+}
+
+export async function resetAllCombos() {
+	await page.evaluate<string>(`resetAllStates()`)
 }

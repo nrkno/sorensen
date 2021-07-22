@@ -27,18 +27,42 @@ let chordsInProgress: ChordInProgress[] = []
 let keysDown: string[] = []
 
 export interface BindOptions {
-	/** Only fire this hotkey if no other keys are pressed. */
+	/** Only fire this hotkey if no other keys are pressed.
+	 *  Default: true
+	 */
 	exclusive?: boolean
 	/**
 	 * Fire this combo even if a text input or textarea is currently in focus.
 	 * If a function is provided, it is evaluated any time this hotkey would fire.
+	 * Default: false
 	 */
 	global?: boolean | ((e: KeyboardEvent, combo: string) => boolean)
-	/** Fire this hotkey after a key is depressed from the combo. */
+	/** Fire this hotkey after a key is depressed from the combo.
+	 *  Default: false
+	 */
 	up?: boolean
-	/** Keys must be pressed in the order given in the combo for the hotkey to fire. */
-	ordered?: boolean
+	/** Keys must be pressed in the order given in the combo for the hotkey to fire.
+	 *
+	 *  `modifiersFirst` means that modifiers need to be activated first, in any order, and then subsequent keys
+	 *  must be pressed in order.
+	 *
+	 *  Default: false
+	 */
+	ordered?: boolean | 'modifiersFirst'
+
+	modifiersPoisonChord?: boolean
 }
+
+const MODIFIER_KEYS = [
+	'ShiftLeft',
+	'ShiftRight',
+	'ControlLeft',
+	'ControlRight',
+	'AltLeft',
+	'AltRight',
+	'MetaLeft',
+	'MetaRight',
+]
 
 /**
  * Special meta-codes that can be used to match for "any" modifer key, like matching for both ShiftLeft and ShiftRight.
@@ -50,7 +74,14 @@ export const VIRTUAL_ANY_POSITION_KEYS: Record<string, string[]> = {
 	Alt: ['AltLeft', 'AltRight'],
 	Meta: ['MetaLeft', 'MetaRight'],
 	AnyEnter: ['Enter', 'NumpadEnter'],
+	Option: ['AltLeft', 'AltRight'],
+	Command: ['OSLeft', 'OSRight'],
+	Windows: ['OSLeft', 'OSRight'],
 }
+const INVERSE_VIRTUAL_ANY_POSITION_KEYS: Record<string, string> = {}
+Object.entries(VIRTUAL_ANY_POSITION_KEYS).forEach((entry) => {
+	entry[1].forEach((code) => (INVERSE_VIRTUAL_ANY_POSITION_KEYS[code] = entry[0]))
+})
 
 function parseCombo(combo: string): ComboChord {
 	return combo
@@ -110,8 +141,15 @@ function unbind(combo: string, listener?: (e: EnchancedKeyboardEvent) => void): 
 	})
 }
 
+function noteIncludesKey(combo: Note, key: string): boolean {
+	return (
+		combo.includes(key) ||
+		(key in INVERSE_VIRTUAL_ANY_POSITION_KEYS ? combo.includes(INVERSE_VIRTUAL_ANY_POSITION_KEYS[key]) : false)
+	)
+}
+
 function matchNote(combo: Note, options?: BindOptions): boolean {
-	if (!options?.ordered) {
+	if (!!options?.ordered === false) {
 		for (let i = 0; i < combo.length; i++) {
 			const code = combo[i]
 			if (code in VIRTUAL_ANY_POSITION_KEYS) {
@@ -133,17 +171,24 @@ function matchNote(combo: Note, options?: BindOptions): boolean {
 			}
 		}
 	} else {
+		const modifiersFirst = options?.ordered === 'modifiersFirst'
 		let lastFound = -1
+		let lastFoundModifier = -1
 		for (let i = 0; i < combo.length; i++) {
 			const code = combo[i]
 			if (code in VIRTUAL_ANY_POSITION_KEYS) {
 				const alternatives = VIRTUAL_ANY_POSITION_KEYS[code]
 				let anyMatch = false
 				for (let j = 0; j < alternatives.length; j++) {
-					const idx = keysDown.indexOf(alternatives[j])
-					if (idx >= 0 && idx >= lastFound) {
+					// we can start at lastFound, anything before that has already been processed
+					const idx = keysDown.indexOf(alternatives[j], lastFound + 1)
+					if (idx >= 0 && idx > lastFound) {
 						anyMatch = true
-						lastFound = idx
+						if (modifiersFirst && MODIFIER_KEYS.includes(alternatives[j])) {
+							lastFoundModifier = idx
+						} else {
+							lastFound = idx
+						}
 						break
 					}
 				}
@@ -151,61 +196,83 @@ function matchNote(combo: Note, options?: BindOptions): boolean {
 					return false
 				}
 			} else {
-				const idx = keysDown.indexOf(combo[i])
-				if (idx < 0 || idx < lastFound) {
+				// we can start at lastFound, anything before that has already been processed
+				const idx = keysDown.indexOf(combo[i], lastFound + 1)
+				if (idx < 0 || idx <= lastFound) {
 					return false // break iterations as soon as possible
 				}
-				lastFound = idx
+				if (modifiersFirst && MODIFIER_KEYS.includes(combo[i])) {
+					lastFoundModifier = idx
+				} else {
+					lastFound = idx
+				}
+			}
+
+			// If modifiersFirst, do not allow modifiers after other keys
+			if (modifiersFirst && lastFound >= 0 && lastFoundModifier > lastFound) {
+				return false
 			}
 		}
 	}
 
-	if (options?.exclusive && keysDown.length !== combo.length) {
+	if ((options?.exclusive ?? true) && keysDown.length !== combo.length) {
 		return false
 	}
 
 	return true
 }
 
-function visitBoundCombos(_key: string, up: boolean, _e: KeyboardEvent) {
+function callListenerIfAllowed(binding: ComboBinding, e: KeyboardEvent, note = 0) {
+	binding.listener(
+		Object.assign(e, {
+			comboChordCodes: binding.combo,
+			comboCodes: binding.combo[note],
+		})
+	)
+}
+
+function visitBoundCombos(_key: string, up: boolean, e: KeyboardEvent) {
 	bound.forEach((binding: ComboBinding) => {
 		if (matchNote(binding.combo[0], binding) && (binding.up || false) === up) {
-			chordsInProgress.push({
-				binding,
-				note: 1,
-			})
+			if (binding.combo.length === 1) {
+				callListenerIfAllowed(binding, e, 0)
+			} else {
+				console.log('In progress: ' + binding)
+				chordsInProgress.push({
+					binding,
+					note: 1,
+				})
+			}
 		}
 	})
 }
 
-function visitChordsInProgress(_key: string, _up: boolean, e: KeyboardEvent) {
+function visitChordsInProgress(key: string, up: boolean, e: KeyboardEvent) {
 	const notInProgress: ChordInProgress[] = []
 	chordsInProgress.forEach((chord: ChordInProgress) => {
-		if (chord.binding.combo.length === chord.note) {
-			chord.binding.listener(
-				Object.assign(e, {
-					comboChordCodes: chord.binding.combo,
-					comboCodes: chord.binding.combo[chord.note - 1],
-				})
-			)
-			notInProgress.push(chord)
-		} else if (chord.binding.combo.length > chord.note) {
-			if (matchNote(chord.binding.combo[chord.note + 1], chord.binding)) {
-				chord.note = chord.note + 1
-				if (chord.binding.combo.length === chord.note) {
-					chord.binding.listener(
-						Object.assign(e, {
-							comboChordCodes: chord.binding.combo,
-							comboCodes: chord.binding.combo[chord.note - 1],
-						})
-					)
+		if ((chord.binding.up || false) === up) {
+			if (chord.binding.combo.length > chord.note) {
+				if (matchNote(chord.binding.combo[chord.note], chord.binding)) {
+					chord.note = chord.note + 1
+					console.log('Did match', chord)
+					if (chord.binding.combo.length === chord.note) {
+						console.log('Executing', chord)
+						callListenerIfAllowed(chord.binding, e, chord.note)
+						notInProgress.push(chord)
+					}
+				} else if (
+					(up || !noteIncludesKey(chord.binding.combo[chord.note], key)) &&
+					(chord.binding.modifiersPoisonChord || !MODIFIER_KEYS.includes(key))
+				) {
+					console.log('No match', chord)
 					notInProgress.push(chord)
 				}
 			} else {
+				console.log('Too short', chord)
 				notInProgress.push(chord)
 			}
 		} else {
-			notInProgress.push(chord)
+			console.log('Wrong direction: ', up)
 		}
 	})
 
@@ -217,6 +284,15 @@ function visitChordsInProgress(_key: string, _up: boolean, e: KeyboardEvent) {
 	})
 }
 
+/**
+ * Cancel all pressed keys and chords in progress
+ *
+ */
+function poison() {
+	keysDown.length = 0
+	chordsInProgress.length = 0
+}
+
 function keyUp(e: KeyboardEvent) {
 	let idx = -1
 	do {
@@ -226,8 +302,8 @@ function keyUp(e: KeyboardEvent) {
 		}
 	} while (idx >= 0)
 
-	visitBoundCombos(e.code, true, e)
 	visitChordsInProgress(e.code, true, e)
+	visitBoundCombos(e.code, true, e)
 }
 
 function keyDown(e: KeyboardEvent) {
@@ -235,8 +311,8 @@ function keyDown(e: KeyboardEvent) {
 		keysDown.push(e.code)
 		console.log(keysDown)
 
-		visitBoundCombos(e.code, false, e)
 		visitChordsInProgress(e.code, false, e)
+		visitBoundCombos(e.code, false, e)
 	}
 }
 
@@ -332,6 +408,7 @@ const Simonsson = {
 	getKeyForCode,
 	bind,
 	unbind,
+	poison,
 }
 
 if (window) {
