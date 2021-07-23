@@ -415,6 +415,67 @@ describe('Simonsson.bind', () => {
 					await page.keyboard.up('KeyC')
 				})
 			})
+
+			describe('interactions', () => {
+				beforeAll(async () => {
+					await bindCombo('KeyA KeyB KeyD')
+					await bindCombo('KeyA KeyB KeyC')
+					await bindCombo('KeyB KeyC')
+					await bindCombo('KeyC')
+				})
+
+				it('KeyA KeyB KeyD plays well with KeyA KeyB KeyC', async () => {
+					await expectToTrigger('KeyA KeyB KeyC', false)
+					await expectToTrigger('KeyA KeyB KeyD', false)
+					await page.keyboard.press('KeyA')
+					await page.keyboard.press('KeyB')
+					await page.keyboard.press('KeyD')
+					await expectToTrigger('KeyA KeyB KeyD', true)
+					await expectToTrigger('KeyA KeyB KeyC', false)
+				})
+
+				it("KeyC doesn't fire when triggering KeyA KeyB KeyC", async () => {
+					await expectToTrigger('KeyA KeyB KeyC', false)
+					await expectToTrigger('KeyB KeyC', false)
+					await expectToTrigger('KeyC', false)
+					await page.keyboard.press('KeyA')
+					await page.keyboard.press('KeyB')
+					await page.keyboard.press('KeyC')
+					await expectToTrigger('KeyA KeyB KeyC', true)
+					await expectToTrigger('KeyB KeyC', false)
+					await expectToTrigger('KeyC', false)
+				})
+			})
+
+			describe('timeout', () => {
+				beforeAll(async () => {
+					await bindCombo('KeyD KeyE KeyF')
+				})
+
+				it("Chords don't timeout when typing slowly", async () => {
+					await expectToTrigger('KeyD KeyE KeyF', false)
+					await page.keyboard.press('KeyD')
+					await expectToTrigger('KeyD KeyE KeyF', false)
+					await page.waitForTimeout(500)
+					await page.keyboard.press('KeyE')
+					await expectToTrigger('KeyD KeyE KeyF', false)
+					await page.waitForTimeout(700)
+					await page.keyboard.press('KeyF')
+					await expectToTrigger('KeyD KeyE KeyF', true)
+				})
+
+				it('Chords timeout after 1s', async () => {
+					await expectToTrigger('KeyD KeyE KeyF', false)
+					await page.keyboard.press('KeyD')
+					await expectToTrigger('KeyD KeyE KeyF', false)
+					await page.waitForTimeout(1000)
+					await page.keyboard.press('KeyE')
+					await expectToTrigger('KeyD KeyE KeyF', false)
+					await page.waitForTimeout(1000)
+					await page.keyboard.press('KeyF')
+					await expectToTrigger('KeyD KeyE KeyF', false)
+				})
+			})
 		})
 	})
 })

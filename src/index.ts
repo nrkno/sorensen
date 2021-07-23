@@ -26,6 +26,9 @@ let bound: ComboBinding[] = []
 let chordsInProgress: ChordInProgress[] = []
 let keysDown: string[] = []
 
+const DEFAULT_CHORD_TIMEOUT = 1000
+let CHORD_TIMEOUT = DEFAULT_CHORD_TIMEOUT
+
 export interface BindOptions {
 	/** Only fire this hotkey if no other keys are pressed.
 	 *  Default: true
@@ -243,11 +246,12 @@ function callListenerIfAllowed(binding: ComboBinding, e: KeyboardEvent, note = 0
 }
 
 function visitBoundCombos(_key: string, up: boolean, e: KeyboardEvent) {
-	const chordsInProgressCount = chordsInProgress.filter((chord) => chord.note > 1).length
+	const chordsInProgressCount = chordsInProgress.length
 	bound.forEach((binding: ComboBinding) => {
 		if (matchNote(binding.combo[0], binding) && (binding.up || false) === up) {
 			if (chordsInProgressCount === 0 || binding.exclusive === false) {
 				if (binding.combo.length === 1) {
+					console.log(binding, chordsInProgress, binding.exclusive)
 					callListenerIfAllowed(binding, e, 0)
 				} else {
 					chordsInProgress.push({
@@ -271,7 +275,7 @@ function visitChordsInProgress(key: string, up: boolean, e: KeyboardEvent) {
 					if (chord.binding.combo.length === chord.note) {
 						console.log('Executing', chord)
 						callListenerIfAllowed(chord.binding, e, chord.note)
-						notInProgress.push(chord)
+						return // do not set up a new timeout for the chord
 					}
 				} else if (
 					(up || !noteIncludesKey(chord.binding.combo[chord.note], key)) &&
@@ -289,12 +293,27 @@ function visitChordsInProgress(key: string, up: boolean, e: KeyboardEvent) {
 		}
 	})
 
-	notInProgress.forEach((chord) => {
-		const idx = chordsInProgress.indexOf(chord)
-		if (idx >= 0) {
-			chordsInProgress.splice(idx, 1)
-		}
-	})
+	chordsInProgress = chordsInProgress.filter((chord) => !notInProgress.includes(chord))
+}
+
+function cleanUpFinishedChords() {
+	chordsInProgress = chordsInProgress.filter((chord) => chord.note < chord.binding.combo.length)
+}
+
+let chordTimeout: NodeJS.Timeout | undefined = undefined
+function setUpChordTimeout() {
+	clearChordTimeout()
+	if (CHORD_TIMEOUT > 0) {
+		chordTimeout = setTimeout(() => {
+			chordsInProgress.length = 0
+		}, CHORD_TIMEOUT)
+	}
+}
+function clearChordTimeout() {
+	if (chordTimeout) {
+		clearTimeout(chordTimeout)
+	}
+	chordTimeout = undefined
 }
 
 /**
@@ -317,6 +336,8 @@ function keyUp(e: KeyboardEvent) {
 
 	visitChordsInProgress(e.code, true, e)
 	visitBoundCombos(e.code, true, e)
+	cleanUpFinishedChords()
+	setUpChordTimeout()
 }
 
 function keyDown(e: KeyboardEvent) {
@@ -326,6 +347,8 @@ function keyDown(e: KeyboardEvent) {
 
 		visitChordsInProgress(e.code, false, e)
 		visitBoundCombos(e.code, false, e)
+		cleanUpFinishedChords()
+		clearChordTimeout()
 	}
 }
 
@@ -367,11 +390,22 @@ function getCodeForKey(key: string): string | undefined {
  */
 function getKeyForCode(code: string): string {
 	if (keyboardLayoutMap) {
-		return keyboardLayoutMap.get(code) || code.replace(/^Key/, '')
+		let key = keyboardLayoutMap.get(code)
+		if (key === undefined) {
+			key = code.replace(/^Key/, '')
+			if (key.length === 1) {
+				key = key.toLowerCase()
+			}
+		}
+		return key
 	} else {
 		// the fallback position is to return the key string without the "Key" prefix, if present.
 		// On US-style keyboards works 9 out of 10 cases.
-		return code.replace(/^Key/, '')
+		let key = code.replace(/^Key/, '')
+		if (key.length === 1) {
+			key = key.toLowerCase()
+		}
+		return key
 	}
 }
 
@@ -379,8 +413,10 @@ function getKeyForCode(code: string): string {
  * Attach Simonsson event handlers to the window and get the current keyboard layout map.
  *
  */
-async function init() {
+async function init(options?: { chordTimeout?: number }) {
 	if (!initialized) {
+		CHORD_TIMEOUT = options?.chordTimeout ?? DEFAULT_CHORD_TIMEOUT
+
 		window.addEventListener('keyup', keyUp, {
 			passive: false,
 			capture: true,
