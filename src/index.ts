@@ -23,10 +23,11 @@ interface ChordInProgress {
 }
 
 let bound: ComboBinding[] = []
+let keyUpIgnoreKeys: string[] = []
 let chordsInProgress: ChordInProgress[] = []
 let keysDown: string[] = []
 
-const DEFAULT_CHORD_TIMEOUT = 1000
+const DEFAULT_CHORD_TIMEOUT = 2000
 let CHORD_TIMEOUT = DEFAULT_CHORD_TIMEOUT
 
 export interface BindOptions {
@@ -151,7 +152,7 @@ function noteIncludesKey(combo: Note, key: string): boolean {
 	)
 }
 
-function matchNote(combo: Note, options?: BindOptions): boolean {
+function matchNote(combo: Note, keysToMatch: string[], options?: BindOptions): boolean {
 	if (!!options?.ordered === false) {
 		for (let i = 0; i < combo.length; i++) {
 			const code = combo[i]
@@ -159,7 +160,7 @@ function matchNote(combo: Note, options?: BindOptions): boolean {
 				const alternatives = VIRTUAL_ANY_POSITION_KEYS[code]
 				let anyMatch = false
 				for (let j = 0; j < alternatives.length; j++) {
-					if (keysDown.includes(alternatives[j])) {
+					if (keysToMatch.includes(alternatives[j])) {
 						anyMatch = true
 						break
 					}
@@ -168,7 +169,7 @@ function matchNote(combo: Note, options?: BindOptions): boolean {
 					return false
 				}
 			} else {
-				if (!keysDown.includes(code)) {
+				if (!keysToMatch.includes(code)) {
 					return false // break iterations as soon as possible
 				}
 			}
@@ -184,7 +185,7 @@ function matchNote(combo: Note, options?: BindOptions): boolean {
 				let anyMatch = false
 				for (let j = 0; j < alternatives.length; j++) {
 					// we can start at lastFound, anything before that has already been processed
-					const idx = keysDown.indexOf(alternatives[j], lastFound + 1)
+					const idx = keysToMatch.indexOf(alternatives[j], lastFound + 1)
 					if (idx >= 0 && idx > lastFound) {
 						anyMatch = true
 						if (modifiersFirst && MODIFIER_KEYS.includes(alternatives[j])) {
@@ -200,7 +201,7 @@ function matchNote(combo: Note, options?: BindOptions): boolean {
 				}
 			} else {
 				// we can start at lastFound, anything before that has already been processed
-				const idx = keysDown.indexOf(combo[i], lastFound + 1)
+				const idx = keysToMatch.indexOf(combo[i], lastFound + 1)
 				if (idx < 0 || idx <= lastFound) {
 					return false // break iterations as soon as possible
 				}
@@ -218,7 +219,7 @@ function matchNote(combo: Note, options?: BindOptions): boolean {
 		}
 	}
 
-	if ((options?.exclusive ?? true) && keysDown.length !== combo.length) {
+	if ((options?.exclusive ?? true) && keysToMatch.length !== combo.length) {
 		return false
 	}
 
@@ -245,19 +246,21 @@ function callListenerIfAllowed(binding: ComboBinding, e: KeyboardEvent, note = 0
 	)
 }
 
-function visitBoundCombos(_key: string, up: boolean, e: KeyboardEvent) {
+function visitBoundCombos(key: string, up: boolean, e: KeyboardEvent) {
 	const chordsInProgressCount = chordsInProgress.length
-	bound.forEach((binding: ComboBinding) => {
-		if (matchNote(binding.combo[0], binding) && (binding.up || false) === up) {
+	bound.forEach((binding) => {
+		if (matchNote(binding.combo[0], up ? [...keysDown, key] : keysDown, binding) && (binding.up || false) === up) {
 			if (chordsInProgressCount === 0 || binding.exclusive === false) {
 				if (binding.combo.length === 1) {
-					console.log(binding, chordsInProgress, binding.exclusive)
+					// DEBUG: console.log(binding, chordsInProgress, binding.exclusive)
 					callListenerIfAllowed(binding, e, 0)
 				} else {
+					// DEBUG: console.log('Begun chord:', binding, binding.exclusive)
 					chordsInProgress.push({
 						binding,
 						note: 1,
 					})
+					keyUpIgnoreKeys = [...keyUpIgnoreKeys, ...keysDown]
 				}
 			}
 		}
@@ -266,30 +269,35 @@ function visitBoundCombos(_key: string, up: boolean, e: KeyboardEvent) {
 
 function visitChordsInProgress(key: string, up: boolean, e: KeyboardEvent) {
 	const notInProgress: ChordInProgress[] = []
-	chordsInProgress.forEach((chord: ChordInProgress) => {
+	// DEBUG: console.log(chordsInProgress)
+	chordsInProgress.forEach((chord) => {
 		if ((chord.binding.up || false) === up) {
 			if (chord.binding.combo.length > chord.note) {
-				if (matchNote(chord.binding.combo[chord.note], chord.binding)) {
+				if (matchNote(chord.binding.combo[chord.note], up ? [...keysDown, key] : keysDown, chord.binding)) {
 					chord.note = chord.note + 1
-					console.log('Did match', chord)
+					// DEBUG: console.log('Did match', chord)
 					if (chord.binding.combo.length === chord.note) {
-						console.log('Executing', chord)
+						// DEBUG: console.log('Executing', chord)
 						callListenerIfAllowed(chord.binding, e, chord.note)
 						return // do not set up a new timeout for the chord
 					}
+					keyUpIgnoreKeys = [...keyUpIgnoreKeys, ...keysDown]
+				} else if (up && keyUpIgnoreKeys.includes(key)) {
+					keyUpIgnoreKeys = keyUpIgnoreKeys.filter((ignoreKey) => ignoreKey !== key)
+					// DEBUG: console.log('Ignored key ticked off', key, keyUpIgnoreKeys)
 				} else if (
-					(up || !noteIncludesKey(chord.binding.combo[chord.note], key)) &&
+					!noteIncludesKey(chord.binding.combo[chord.note], key) &&
 					(chord.binding.modifiersPoisonChord || !MODIFIER_KEYS.includes(key))
 				) {
-					console.log('No match', chord)
+					// DEBUG: console.log('No match', chord)
 					notInProgress.push(chord)
 				}
 			} else {
-				console.log('Too short', chord)
+				// DEBUG: console.log('Too short', chord)
 				notInProgress.push(chord)
 			}
 		} else {
-			console.log('Wrong direction: ', up)
+			// DEBUG: console.log('Wrong direction: ', up)
 		}
 	})
 
@@ -300,8 +308,14 @@ function cleanUpFinishedChords() {
 	chordsInProgress = chordsInProgress.filter((chord) => chord.note < chord.binding.combo.length)
 }
 
+function cleanUpKeyUpIgnoreKeys() {
+	if (keysDown.length === 0) {
+		keyUpIgnoreKeys.length = 0
+	}
+}
+
 let chordTimeout: NodeJS.Timeout | undefined = undefined
-function setUpChordTimeout() {
+function setupChordTimeout() {
 	clearChordTimeout()
 	if (CHORD_TIMEOUT > 0) {
 		chordTimeout = setTimeout(() => {
@@ -337,13 +351,15 @@ function keyUp(e: KeyboardEvent) {
 	visitChordsInProgress(e.code, true, e)
 	visitBoundCombos(e.code, true, e)
 	cleanUpFinishedChords()
-	setUpChordTimeout()
+	setupChordTimeout()
+	cleanUpKeyUpIgnoreKeys()
+	// DEBUG: console.log(chordsInProgress)
 }
 
 function keyDown(e: KeyboardEvent) {
 	if (!e.repeat) {
 		keysDown.push(e.code)
-		console.log(keysDown)
+		// DEBUG: console.log(keysDown)
 
 		visitChordsInProgress(e.code, false, e)
 		visitBoundCombos(e.code, false, e)
@@ -357,7 +373,7 @@ async function getKeyboardLayoutMap() {
 		try {
 			keyboardLayoutMap = await navigator.keyboard.getLayoutMap()
 		} catch (e) {
-			console.error('Could not get keyboard layout map.')
+			console.error('Could not get keyboard layout map.', e)
 		}
 	}
 }

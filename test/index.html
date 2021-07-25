@@ -34,9 +34,6 @@
 
 <script>
 	;(function () {
-		const YES = 'Yes'
-		const NO = 'No'
-
 		const bindings = []
 		Simonsson.init().then(() => {
 			document.getElementById('mounted').textContent = 'Simonsson is initialized'
@@ -46,7 +43,7 @@
 			const template = document.getElementById('binding')
 			const bindRow = template.content.cloneNode(true)
 			bindRow.querySelector('.combo').textContent = combo
-			bindRow.querySelector('.hit').textContent = 'No'
+			bindRow.querySelector('.hit').textContent = (0).toString()
 			document.getElementById('result').appendChild(bindRow)
 			const inserted = document.getElementById('result').lastElementChild
 			inserted.dataset['combo'] = combo
@@ -54,7 +51,7 @@
 				combo,
 				() => {
 					const hitCell = inserted.querySelector('.hit')
-					hitCell.textContent = YES
+					hitCell.textContent = (Number(hitCell.textContent) || 0) + 1
 					hitCell.classList.add('hot')
 					if (typeof clb === 'function') clb()
 				},
@@ -63,14 +60,14 @@
 		}
 
 		const resetState = (combo) => {
-			document.querySelector(`.binding[data-combo="${combo}"] .hit`).textContent = NO
+			document.querySelector(`.binding[data-combo="${combo}"] .hit`).textContent = (0).toString()
 			document.querySelector(`.binding[data-combo="${combo}"] .hit`).classList.remove('hot')
 		}
 
 		const resetAllStates = () => {
 			const allStates = document.querySelectorAll(`.binding .hit`)
 			allStates.forEach((element) => {
-				element.textContent = NO
+				element.textContent = (0).toString()
 				element.classList.remove('hot')
 			})
 		}

@@ -5,9 +5,9 @@ export async function bindCombo(combo: string, options?: BindOptions) {
 	await page.evaluate<string>(`bindCombo(${JSON.stringify(combo)}, ${JSON.stringify(options || {})})`)
 }
 
-export async function expectToTrigger(combo: string, yesOrNo: boolean) {
+export async function expectToTrigger(combo: string, count: number) {
 	await expectPuppet(page).toMatchElement(`#result .binding[data-combo="${combo}"] .hit`, {
-		text: yesOrNo ? 'Yes' : 'No',
+		text: count.toString(),
 	})
 }
 
