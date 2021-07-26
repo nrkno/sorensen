@@ -35,7 +35,7 @@
 <script>
 	;(function () {
 		const bindings = []
-		Simonsson.init().then(() => {
+		simonsson.init().then(() => {
 			document.getElementById('mounted').textContent = 'Simonsson is initialized'
 		})
 
@@ -47,7 +47,7 @@
 			document.getElementById('result').appendChild(bindRow)
 			const inserted = document.getElementById('result').lastElementChild
 			inserted.dataset['combo'] = combo
-			Simonsson.bind(
+			simonsson.bind(
 				combo,
 				() => {
 					const hitCell = inserted.querySelector('.hit')

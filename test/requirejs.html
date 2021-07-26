@@ -4,8 +4,8 @@
 <p id="mounted">Not initialized</p>
 <div id="result"></div>
 <script>
-	requirejs(['simonsson'], function (Simonsson) {
-		Simonsson.init().then(() => {
+	requirejs(['simonsson'], function (simonsson) {
+		simonsson.init().then(() => {
 			document.getElementById('mounted').textContent = 'Simonsson is initialized'
 		})
 	})

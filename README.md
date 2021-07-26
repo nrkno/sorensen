@@ -24,7 +24,7 @@ yarn add @nrkno/simonsson
 Use
 ---
 
-```
+```javascript
 import Simonsson from '@nrkno/simonsson'
 await Simonsson.init()
 Simonsson.bind('Tab+KeyT', (e) => {

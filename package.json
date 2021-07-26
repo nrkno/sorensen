@@ -2,7 +2,7 @@
   "name": "simonsson",
   "version": "0.0.1-0",
   "description": "A modern, i18n-friendly hotkey library for the Web",
-  "main": "dist/index.js",
+  "main": "dist/simonsson.js",
   "typings": "dist/index.d.ts",
   "author": "Jan Starzak <jan.starzak@nrk.no>",
   "license": "MIT",

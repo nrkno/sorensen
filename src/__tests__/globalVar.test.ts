@@ -7,7 +7,7 @@ describe('Global object injection', () => {
 	})
 
 	it('should expose global object', async () => {
-		const mounted = await page.evaluate<string>('typeof window.Simonsson.bind')
+		const mounted = await page.evaluate<string>('typeof window.simonsson.bind')
 		expect(mounted).toBe('function')
 	})
 

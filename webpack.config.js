@@ -3,7 +3,7 @@ const pkg = require('./package.json')
 const env = require('yargs').argv.env
 
 const libraryName = pkg.name
-const libraryObjName = 'Simonsson'
+const libraryObjName = 'simonsson'
 
 module.exports = {
 	mode: env === 'dev' ? 'development' : 'production',
@@ -11,9 +11,10 @@ module.exports = {
 	output: {
 		path: path.join(__dirname, 'dist'),
 		filename: `${libraryName}.js`,
+		library: libraryObjName,
 		libraryTarget: 'umd',
 		libraryExport: 'default',
-		umdNamedDefine: false,
+		umdNamedDefine: true,
 	},
 	devtool: 'source-map',
 	optimization: env === 'dev'

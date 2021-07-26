@@ -10,6 +10,7 @@ type ComboChord = Note[]
 interface EnchancedKeyboardEvent extends KeyboardEvent {
 	comboChordCodes: ComboChord
 	comboCodes: Note
+	tag: any | undefined
 }
 
 interface ComboBinding extends BindOptions {
@@ -54,7 +55,18 @@ export interface BindOptions {
 	 */
 	ordered?: boolean | 'modifiersFirst'
 
+	/**
+	 * If this is enabled, events on modifier keys (keyup or keydown, depending on the binding direction), will cause
+	 * a chord in progress to be poisoned and terminated.
+	 *
+	 * Default: false
+	 */
 	modifiersPoisonChord?: boolean
+
+	/**
+	 * Assign any variable to the binding. This will be returned to the event listener as a part of the event object.
+	 */
+	tag?: any | undefined
 }
 
 const MODIFIER_KEYS = [
@@ -66,6 +78,8 @@ const MODIFIER_KEYS = [
 	'AltRight',
 	'MetaLeft',
 	'MetaRight',
+	'OSLeft',
+	'OSRight',
 ]
 
 /**
@@ -99,7 +113,7 @@ function stringifyCombo(combo: ComboChord): string {
 }
 
 /**
- * Bind a combo or set of combos to a given listener.
+ * Bind a combo or set of combos to a given event listener.
  *
  * @param {(string | string[])} combo
  * @param {(e: EnchancedKeyboardEvent) => void} listener
@@ -127,22 +141,26 @@ function bind(combo: string | string[], listener: (e: EnchancedKeyboardEvent) =>
 	})
 }
 
-function unbind(combo: string, listener?: (e: EnchancedKeyboardEvent) => void): void {
+/**
+ * Unbind a combo from a given event listener. If a `tag` is provided, only bindings with a strictly equal binding will
+ * be removed
+ *
+ * @param {string} combo
+ * @param {(e: EnchancedKeyboardEvent) => void} [listener]
+ */
+function unbind(combo: string, listener?: (e: EnchancedKeyboardEvent) => void, tag?: any): void {
 	let bindingsToUnbind: ComboBinding[] = []
 	let normalizedCombo = stringifyCombo(parseCombo(combo))
 
 	bound.forEach((binding) => {
 		if ((!listener || binding.listener === listener) && stringifyCombo(binding.combo) === normalizedCombo) {
-			bindingsToUnbind.push(binding)
+			if (tag === undefined || tag === binding.tag) {
+				bindingsToUnbind.push(binding)
+			}
 		}
 	})
 
-	bindingsToUnbind.forEach((binding) => {
-		const idx = bound.indexOf(binding)
-		if (idx >= 0) {
-			bound.splice(idx, 1)
-		}
-	})
+	bound = bound.filter((binding) => !bindingsToUnbind.includes(binding))
 }
 
 function noteIncludesKey(combo: Note, key: string): boolean {
@@ -229,7 +247,9 @@ function matchNote(combo: Note, keysToMatch: string[], options?: BindOptions): b
 function callListenerIfAllowed(binding: ComboBinding, e: KeyboardEvent, note = 0) {
 	if (
 		!binding.global &&
-		(document.activeElement?.tagName === 'TEXTAREA' || document.activeElement?.tagName === 'INPUT')
+		(document.activeElement?.tagName === 'TEXTAREA' ||
+			document.activeElement?.tagName === 'INPUT' ||
+			document.activeElement?.shadowRoot)
 	) {
 		return
 	} else if (typeof binding.global === 'function') {
@@ -242,6 +262,7 @@ function callListenerIfAllowed(binding: ComboBinding, e: KeyboardEvent, note = 0
 		Object.assign(e, {
 			comboChordCodes: binding.combo,
 			comboCodes: binding.combo[note],
+			tag: binding.tag,
 		})
 	)
 }
@@ -426,8 +447,13 @@ function getKeyForCode(code: string): string {
 }
 
 /**
- * Attach Simonsson event handlers to the window and get the current keyboard layout map.
+ * Initialize Simonsson, get the current keyboard layout map and attach keyboard event listeners to
+ * a root DOM node.
  *
+ * Default:
+ * * `chordTimeout: 2000` - time in milliseconds waiting for a new keypress in chords
+ *
+ * @param {{ chordTimeout?: number, shadowRoot?: any }} [options]
  */
 async function init(options?: { chordTimeout?: number }) {
 	if (!initialized) {
@@ -441,12 +467,13 @@ async function init(options?: { chordTimeout?: number }) {
 			passive: false,
 			capture: true,
 		})
-		window.addEventListener('layoutchange', () => {
-			getKeyboardLayoutMap().catch(console.error)
-		})
+		window.addEventListener('layoutchange', getKeyboardLayoutMap)
 		await getKeyboardLayoutMap()
 
 		bound = []
+		keysDown = []
+		chordsInProgress = []
+
 		initialized = true
 	} else {
 		throw new Error('Simonsson already initialized.')
@@ -461,6 +488,7 @@ async function destroy() {
 	if (initialized) {
 		window.removeEventListener('keyup', keyUp)
 		window.removeEventListener('keydown', keyDown)
+		window.removeEventListener('layoutchange', getKeyboardLayoutMap)
 
 		initialized = false
 	} else {
@@ -468,7 +496,7 @@ async function destroy() {
 	}
 }
 
-const Simonsson = {
+const simonsson = {
 	init,
 	destroy,
 	getCodeForKey,
@@ -480,7 +508,7 @@ const Simonsson = {
 
 if (window) {
 	//@ts-ignore this is to work around a bug in webpack DevServer
-	window['Simonsson'] = Simonsson
+	window['simonsson'] = simonsson
 }
 
-export default Simonsson
+export default simonsson
