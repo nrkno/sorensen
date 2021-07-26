@@ -1,4 +1,4 @@
-name: Node CI
+name: Webpack CI
 
 on: [push]
 
@@ -6,17 +6,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [12.x, 14.x]
-
     steps:
-      - uses: actions/checkout@v1
-      - name: Use Node.js ${{ matrix.node-version }}
+      - uses: actions/checkout@v2
+      - name: Use Node.js 12.x
         uses: actions/setup-node@v1
         with:
-          node-version: ${{ matrix.node-version }}
-      - name: npm install, build, and test
+          node-version: 12.x
+      - name: Test in Chromium
         run: |
           yarn
           yarn ci
