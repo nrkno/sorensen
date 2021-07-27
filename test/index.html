@@ -27,16 +27,47 @@
 <h1>Simonsson test playground</h1>
 <p id="mounted">Not initialized</p>
 <div id="result"></div>
-<input type="text" id="inputText" />
-<input type="checkbox" id="inputCheckbox" />
-<textarea id="textarea"></textarea>
-<button>Dummy</button>
+<div style="background: gray; margin: 1em 0">
+	<p>Area used by automated tests</p>
+	<input type="text" id="inputText" />
+	<input type="checkbox" id="inputCheckbox" />
+	<textarea id="textarea"></textarea>
+	<button>Dummy</button>
+</div>
+<div style="background: bisque; margin: 1em 0">
+	<input type="text" id="comboLearn" readonly />
+	<button id="attach">Attach</button>
+</div>
 
 <script>
 	;(function () {
 		const bindings = []
 		simonsson.init().then(() => {
 			document.getElementById('mounted').textContent = 'Simonsson is initialized'
+
+			window.addEventListener('keydown', (e) => {
+				const field = document.getElementById('comboLearn')
+				if (document.activeElement === field) {
+					field.value = simonsson.getPressedKeys().join('+')
+					e.preventDefault()
+				}
+			})
+
+			const button = document.getElementById('attach')
+			button.addEventListener('click', () => {
+				const field = document.getElementById('comboLearn')
+				if (field.value.trim() !== '') {
+					bindCombo(
+						field.value,
+						{
+							global: true,
+						},
+						(e) => {
+							e.preventDefault()
+						}
+					)
+				}
+			})
 		})
 
 		const bindCombo = (combo, options, clb) => {
@@ -49,11 +80,11 @@
 			inserted.dataset['combo'] = combo
 			simonsson.bind(
 				combo,
-				() => {
+				(e) => {
 					const hitCell = inserted.querySelector('.hit')
 					hitCell.textContent = (Number(hitCell.textContent) || 0) + 1
 					hitCell.classList.add('hot')
-					if (typeof clb === 'function') clb()
+					if (typeof clb === 'function') clb(e)
 				},
 				options
 			)

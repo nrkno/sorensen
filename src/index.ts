@@ -389,6 +389,13 @@ function keyDown(e: KeyboardEvent) {
 	}
 }
 
+function visibilityChange() {
+	if ('visibilityState' in document && document.visibilityState === 'hidden') {
+		// reset keysDown when user moved away from the page
+		keysDown.length = 0
+	}
+}
+
 async function getKeyboardLayoutMap() {
 	if ('keyboard' in navigator && typeof navigator.keyboard.getLayoutMap === 'function') {
 		try {
@@ -397,6 +404,10 @@ async function getKeyboardLayoutMap() {
 			console.error('Could not get keyboard layout map.', e)
 		}
 	}
+}
+
+function getPressedKeys(): string[] {
+	return [...keysDown]
 }
 
 /**
@@ -468,6 +479,7 @@ async function init(options?: { chordTimeout?: number }) {
 			capture: true,
 		})
 		window.addEventListener('layoutchange', getKeyboardLayoutMap)
+		window.addEventListener('visibilitychange', visibilityChange)
 		await getKeyboardLayoutMap()
 
 		bound = []
@@ -489,6 +501,7 @@ async function destroy() {
 		window.removeEventListener('keyup', keyUp)
 		window.removeEventListener('keydown', keyDown)
 		window.removeEventListener('layoutchange', getKeyboardLayoutMap)
+		window.removeEventListener('visibilitychange', visibilityChange)
 
 		initialized = false
 	} else {
@@ -501,6 +514,7 @@ const simonsson = {
 	destroy,
 	getCodeForKey,
 	getKeyForCode,
+	getPressedKeys,
 	bind,
 	unbind,
 	poison,

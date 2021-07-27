@@ -26,9 +26,9 @@ Use
 ---
 
 ```javascript
-import Simonsson from 'simonsson'
-await Simonsson.init()
-Simonsson.bind('Tab+KeyT', (e) => {
+import simonsson from 'simonsson'
+await simonsson.init()
+simonsson.bind('Tab+KeyT', (e) => {
 	// Simonsson extends the KeyboardEvent object with `comboChordCodes` and `comboCodes`
 	console.log(e)
 	e.preventDefault()
