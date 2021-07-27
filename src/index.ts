@@ -429,7 +429,7 @@ function getKeyForCode(code: string): string {
 	if (keyboardLayoutMap) {
 		let key = keyboardLayoutMap.get(code)
 		if (key === undefined) {
-			key = code.replace(/^Key/, '')
+			key = code.replace(/^Key/, '').replace(/^Digit(?=\d+)/, '')
 			if (key.length === 1) {
 				key = key.toLowerCase()
 			}
@@ -438,7 +438,7 @@ function getKeyForCode(code: string): string {
 	} else {
 		// the fallback position is to return the key string without the "Key" prefix, if present.
 		// On US-style keyboards works 9 out of 10 cases.
-		let key = code.replace(/^Key/, '')
+		let key = code.replace(/^Key/, '').replace(/^Digit(?=\d+)/, '')
 		if (key.length === 1) {
 			key = key.toLowerCase()
 		}
