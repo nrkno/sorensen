@@ -311,7 +311,7 @@ describe('Simonsson.bind', () => {
 						await page.keyboard.up('ShiftLeft')
 					})
 
-					it('Ctrl+Shift+KeyA fires when pressing KeyA+ControlLeft+ShiftLeft+KeyL', async () => {
+					it('Ctrl+Shift+KeyA fires when pressing KeyL+ControlLeft+ShiftLeft+KeyA', async () => {
 						await expectToTrigger('Ctrl+Shift+KeyA', 0)
 						await page.keyboard.down('KeyL')
 						await page.keyboard.down('ControlLeft')
