@@ -7,11 +7,11 @@ describe('Global object injection', () => {
 	})
 
 	it('should expose global object', async () => {
-		const mounted = await page.evaluate<string>('typeof window.simonsson.bind')
+		const mounted = await page.evaluate<string>('typeof window.sorensen.bind')
 		expect(mounted).toBe('function')
 	})
 
 	it('should initialize', async () => {
-		await expectPuppet(page).toMatchElement('p', { text: 'Simonsson is initialized' })
+		await expectPuppet(page).toMatchElement('p', { text: 'Sørensen is initialized' })
 	})
 })

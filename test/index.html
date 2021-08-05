@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<script src="simonsson.js"></script>
+<script src="sorensen.js"></script>
 <style>
 	#result .binding {
 		display: flex;
@@ -24,7 +24,7 @@
 		</div>
 	</div>
 </template>
-<h1>Simonsson test playground</h1>
+<h1>Sørensen test playground</h1>
 <p id="mounted">Not initialized</p>
 <div id="result"></div>
 <div style="background: gray; margin: 1em 0">
@@ -42,13 +42,13 @@
 <script>
 	;(function () {
 		const bindings = []
-		simonsson.init().then(() => {
-			document.getElementById('mounted').textContent = 'Simonsson is initialized'
+		sorensen.init().then(() => {
+			document.getElementById('mounted').textContent = 'Sørensen is initialized'
 
 			window.addEventListener('keydown', (e) => {
 				const field = document.getElementById('comboLearn')
 				if (document.activeElement === field) {
-					field.value = simonsson.getPressedKeys().join('+')
+					field.value = sorensen.getPressedKeys().join('+')
 					e.preventDefault()
 				}
 			})
@@ -78,7 +78,7 @@
 			document.getElementById('result').appendChild(bindRow)
 			const inserted = document.getElementById('result').lastElementChild
 			inserted.dataset['combo'] = combo
-			simonsson.bind(
+			sorensen.bind(
 				combo,
 				(e) => {
 					const hitCell = inserted.querySelector('.hit')

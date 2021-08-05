@@ -7,6 +7,6 @@ describe('AMD Module export', () => {
 	})
 
 	it('should initialize', async () => {
-		await expectPuppet(page).toMatchElement('p', { text: 'Simonsson is initialized' })
+		await expectPuppet(page).toMatchElement('p', { text: 'Sørensen is initialized' })
 	})
 })

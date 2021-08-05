@@ -1,10 +1,10 @@
 jest.setTimeout(300000)
 
 async function getKeyForCode(code: string): Promise<string> {
-	return await page.evaluate<string>(`simonsson.getKeyForCode(${JSON.stringify(code)})`)
+	return await page.evaluate<string>(`sorensen.getKeyForCode(${JSON.stringify(code)})`)
 }
 
-describe('Simonsson.getKeyForCode', () => {
+describe('Sørensen.getKeyForCode', () => {
 	beforeAll(async () => {
 		await page.goto('http://localhost:9000/index.html')
 		await page.waitForTimeout(300)

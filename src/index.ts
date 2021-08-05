@@ -121,7 +121,7 @@ function stringifyCombo(combo: ComboChord): string {
  */
 function bind(combo: string | string[], listener: (e: EnchancedKeyboardEvent) => void, options?: BindOptions): void {
 	if (!initialized) {
-		throw new Error('Simonsson needs to be initialized before binding any combos.')
+		throw new Error('Sørensen needs to be initialized before binding any combos.')
 	}
 
 	if (!Array.isArray(combo)) {
@@ -458,7 +458,7 @@ function getKeyForCode(code: string): string {
 }
 
 /**
- * Initialize Simonsson, get the current keyboard layout map and attach keyboard event listeners to
+ * Initialize Sørensen, get the current keyboard layout map and attach keyboard event listeners to
  * a root DOM node.
  *
  * Default:
@@ -488,12 +488,12 @@ async function init(options?: { chordTimeout?: number }) {
 
 		initialized = true
 	} else {
-		throw new Error('Simonsson already initialized.')
+		throw new Error('Sørensen already initialized.')
 	}
 }
 
 /**
- * Remove all Simonsson event handlers from the window.
+ * Remove all Sørensen event handlers from the window.
  *
  */
 async function destroy() {
@@ -505,11 +505,11 @@ async function destroy() {
 
 		initialized = false
 	} else {
-		throw new Error('Simonsson already destroyed.')
+		throw new Error('Sørensen already destroyed.')
 	}
 }
 
-const simonsson = {
+const sorensen = {
 	init,
 	destroy,
 	getCodeForKey,
@@ -522,7 +522,7 @@ const simonsson = {
 
 if (window) {
 	//@ts-ignore this is to work around a bug in webpack DevServer
-	window['simonsson'] = simonsson
+	window['sorensen'] = sorensen
 }
 
-export default simonsson
+export default sorensen

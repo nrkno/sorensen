@@ -2,7 +2,7 @@ import { bindCombo, expectToTrigger, resetAllCombos } from './utils/bindCombo'
 
 jest.setTimeout(300000)
 
-describe('Simonsson.bind', () => {
+describe('Sørensen.bind', () => {
 	describe('keydown', () => {
 		beforeAll(async () => {
 			await page.goto('http://localhost:9000/index.html')

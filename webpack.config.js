@@ -3,7 +3,7 @@ const pkg = require('./package.json')
 const env = require('yargs').argv.env
 
 const libraryName = pkg.name
-const libraryObjName = 'simonsson'
+const libraryObjName = 'sorensen'
 
 module.exports = {
 	mode: env === 'dev' ? 'development' : 'production',
