@@ -33,6 +33,7 @@ const DEFAULT_CHORD_TIMEOUT = 2000
 let CHORD_TIMEOUT = DEFAULT_CHORD_TIMEOUT
 
 const SORENSEN_IMMEDIATE_PROPAGATION_STOPPED = Symbol('sorensen_immediatePropagationStopped')
+const SORENSEN_STOP_IMMEDIATE_PROPAGATION = Symbol('sorensen_stopImmediatePropagation')
 
 export interface BindOptions {
 	/** Only fire this hotkey if no other keys are pressed.
@@ -303,8 +304,11 @@ function callListenerIfAllowed(binding: ComboBinding, e: KeyboardEvent, note = 0
 			tag: binding.tag,
 			[SORENSEN_IMMEDIATE_PROPAGATION_STOPPED]: false,
 			stopImmediatePropagation: () => {
+				if ((e as any)[SORENSEN_IMMEDIATE_PROPAGATION_STOPPED]) {
+					return
+				}
 				;(e as any)[SORENSEN_IMMEDIATE_PROPAGATION_STOPPED] = true
-				e.stopImmediatePropagation()
+				;(e as any)[SORENSEN_STOP_IMMEDIATE_PROPAGATION]()
 			},
 		})
 	)
@@ -408,6 +412,12 @@ function preventAllDefaults(e: KeyboardEvent) {
 	e.stopImmediatePropagation()
 }
 
+function overloadEventStopImmediatePropagation(e: KeyboardEvent) {
+	return Object.assign(e, {
+		[SORENSEN_STOP_IMMEDIATE_PROPAGATION]: e.stopImmediatePropagation,
+	})
+}
+
 let chordTimeout: NodeJS.Timeout | undefined = undefined
 function setupChordTimeout() {
 	clearChordTimeout()
@@ -442,6 +452,7 @@ function keyUp(e: KeyboardEvent) {
 		}
 	} while (idx >= 0)
 
+	e = overloadEventStopImmediatePropagation(e)
 	visitChordsInProgress(e.code, true, e)
 	visitBoundCombos(e.code, true, e)
 	cleanUpFinishedChords()
@@ -456,6 +467,7 @@ function keyDown(e: KeyboardEvent) {
 		keysDown.push(e.code)
 		// DEBUG: console.log(keysDown)
 
+		e = overloadEventStopImmediatePropagation(e)
 		visitChordsInProgress(e.code, false, e)
 		visitBoundCombos(e.code, false, e)
 		cleanUpFinishedChords()
