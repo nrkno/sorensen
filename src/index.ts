@@ -25,6 +25,7 @@ interface ChordInProgress {
 
 let bound: ComboBinding[] = []
 let keyUpIgnoreKeys: string[] = []
+let keyRepeatIgnoreKeys: string[] = []
 let chordsInProgress: ChordInProgress[] = []
 let keysDown: string[] = []
 
@@ -67,6 +68,12 @@ export interface BindOptions {
 	 * Assign any variable to the binding. This will be returned to the event listener as a part of the event object.
 	 */
 	tag?: any | undefined
+
+	/**
+	 * Prevent default behavior on any partial matches and key repeats
+	 * Default: true
+	 */
+	preventDefaultPartials?: boolean
 }
 
 const MODIFIER_KEYS = [
@@ -170,7 +177,8 @@ function noteIncludesKey(combo: Note, key: string): boolean {
 	)
 }
 
-function matchNote(combo: Note, keysToMatch: string[], options?: BindOptions): boolean {
+function matchNote(combo: Note, keysToMatch: string[], options: BindOptions, outIgnoredKeys: string[]): boolean {
+	let match = true
 	if (!!options?.ordered === false) {
 		for (let i = 0; i < combo.length; i++) {
 			const code = combo[i]
@@ -179,16 +187,19 @@ function matchNote(combo: Note, keysToMatch: string[], options?: BindOptions): b
 				let anyMatch = false
 				for (let j = 0; j < alternatives.length; j++) {
 					if (keysToMatch.includes(alternatives[j])) {
+						outIgnoredKeys.push(alternatives[j])
 						anyMatch = true
 						break
 					}
 				}
 				if (!anyMatch) {
-					return false
+					match = false
 				}
 			} else {
 				if (!keysToMatch.includes(code)) {
-					return false // break iterations as soon as possible
+					match = false
+				} else {
+					outIgnoredKeys.push(code)
 				}
 			}
 		}
@@ -211,28 +222,31 @@ function matchNote(combo: Note, keysToMatch: string[], options?: BindOptions): b
 						} else {
 							lastFound = idx
 						}
+						outIgnoredKeys.push(alternatives[j])
 						break
 					}
 				}
 				if (!anyMatch) {
-					return false
+					match = false
 				}
 			} else {
 				// we can start at lastFound, anything before that has already been processed
 				const idx = keysToMatch.indexOf(combo[i], lastFound + 1)
 				if (idx < 0 || idx <= lastFound) {
-					return false // break iterations as soon as possible
+					match = false
+					break
 				}
 				if (modifiersFirst && MODIFIER_KEYS.includes(combo[i])) {
 					lastFoundModifier = idx
 				} else {
 					lastFound = idx
 				}
+				outIgnoredKeys.push(combo[i])
 			}
 
 			// If modifiersFirst, do not allow modifiers after other keys
 			if (modifiersFirst && lastFound >= 0 && lastFoundModifier > lastFound) {
-				return false
+				match = false
 			}
 		}
 	}
@@ -241,21 +255,28 @@ function matchNote(combo: Note, keysToMatch: string[], options?: BindOptions): b
 		return false
 	}
 
-	return true
+	return match
 }
 
-function callListenerIfAllowed(binding: ComboBinding, e: KeyboardEvent, note = 0) {
+function isAllowedToExecute(binding: ComboBinding, e: KeyboardEvent): boolean {
 	if (
 		!binding.global &&
 		(document.activeElement?.tagName === 'TEXTAREA' ||
 			document.activeElement?.tagName === 'INPUT' ||
 			document.activeElement?.shadowRoot)
 	) {
-		return
+		return false
 	} else if (typeof binding.global === 'function') {
 		if (!binding.global(e, stringifyCombo(binding.combo))) {
-			return
+			return false
 		}
+	}
+	return true
+}
+
+function callListenerIfAllowed(binding: ComboBinding, e: KeyboardEvent, note = 0) {
+	if (!isAllowedToExecute(binding, e)) {
+		return
 	}
 
 	binding.listener(
@@ -267,10 +288,20 @@ function callListenerIfAllowed(binding: ComboBinding, e: KeyboardEvent, note = 0
 	)
 }
 
+function insertKeyRepeatIgnoreKeys(binding: ComboBinding, e: KeyboardEvent, ignoredKeys: string[]) {
+	if (binding.preventDefaultPartials !== false && isAllowedToExecute(binding, e)) {
+		keyRepeatIgnoreKeys = [...keyRepeatIgnoreKeys, ...ignoredKeys]
+	}
+}
+
 function visitBoundCombos(key: string, up: boolean, e: KeyboardEvent) {
 	const chordsInProgressCount = chordsInProgress.length
 	bound.forEach((binding) => {
-		if (matchNote(binding.combo[0], up ? [...keysDown, key] : keysDown, binding) && (binding.up || false) === up) {
+		const ignoredKeys: string[] = []
+		if (
+			matchNote(binding.combo[0], up ? [...keysDown, key] : keysDown, binding, ignoredKeys) &&
+			(binding.up || false) === up
+		) {
 			if (chordsInProgressCount === 0 || binding.exclusive === false) {
 				if (binding.combo.length === 1) {
 					// DEBUG: console.log(binding, chordsInProgress, binding.exclusive)
@@ -285,6 +316,7 @@ function visitBoundCombos(key: string, up: boolean, e: KeyboardEvent) {
 				}
 			}
 		}
+		insertKeyRepeatIgnoreKeys(binding, e, ignoredKeys)
 	})
 }
 
@@ -294,7 +326,10 @@ function visitChordsInProgress(key: string, up: boolean, e: KeyboardEvent) {
 	chordsInProgress.forEach((chord) => {
 		if ((chord.binding.up || false) === up) {
 			if (chord.binding.combo.length > chord.note) {
-				if (matchNote(chord.binding.combo[chord.note], up ? [...keysDown, key] : keysDown, chord.binding)) {
+				const ignoredKeys: string[] = []
+				if (
+					matchNote(chord.binding.combo[chord.note], up ? [...keysDown, key] : keysDown, chord.binding, ignoredKeys)
+				) {
 					chord.note = chord.note + 1
 					// DEBUG: console.log('Did match', chord)
 					if (chord.binding.combo.length === chord.note) {
@@ -313,6 +348,7 @@ function visitChordsInProgress(key: string, up: boolean, e: KeyboardEvent) {
 					// DEBUG: console.log('No match', chord)
 					notInProgress.push(chord)
 				}
+				insertKeyRepeatIgnoreKeys(chord.binding, e, ignoredKeys)
 			} else {
 				// DEBUG: console.log('Too short', chord)
 				notInProgress.push(chord)
@@ -333,6 +369,21 @@ function cleanUpKeyUpIgnoreKeys() {
 	if (keysDown.length === 0) {
 		keyUpIgnoreKeys.length = 0
 	}
+}
+
+function cleanUpKeyRepeatIgnoreKeys(e?: KeyboardEvent) {
+	if (keysDown.length === 0) {
+		keyRepeatIgnoreKeys.length = 0
+	}
+	if (e) {
+		keyRepeatIgnoreKeys = keyRepeatIgnoreKeys.filter((key) => key !== e.code)
+	}
+}
+
+function preventAllDefaults(e: KeyboardEvent) {
+	e.preventDefault()
+	e.stopPropagation()
+	e.stopImmediatePropagation()
 }
 
 let chordTimeout: NodeJS.Timeout | undefined = undefined
@@ -374,6 +425,7 @@ function keyUp(e: KeyboardEvent) {
 	cleanUpFinishedChords()
 	setupChordTimeout()
 	cleanUpKeyUpIgnoreKeys()
+	cleanUpKeyRepeatIgnoreKeys(e)
 	// DEBUG: console.log(chordsInProgress)
 }
 
@@ -386,6 +438,9 @@ function keyDown(e: KeyboardEvent) {
 		visitBoundCombos(e.code, false, e)
 		cleanUpFinishedChords()
 		clearChordTimeout()
+	}
+	if (keyRepeatIgnoreKeys.includes(e.code)) {
+		preventAllDefaults(e)
 	}
 }
 

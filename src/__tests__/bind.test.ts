@@ -21,7 +21,9 @@ describe('Sørensen.bind', () => {
 
 			it('KeyA fires when pressing KeyA', async () => {
 				await expectToTrigger('KeyA', 0)
-				await page.keyboard.press('KeyA')
+				await page.keyboard.press('KeyA', {
+					delay: 5,
+				})
 
 				await expectToTrigger('KeyA', 1)
 			})
@@ -29,6 +31,21 @@ describe('Sørensen.bind', () => {
 			it('KeyA fires on keydown', async () => {
 				await expectToTrigger('KeyA', 0)
 				await page.keyboard.down('KeyA')
+
+				await expectToTrigger('KeyA', 1)
+				await page.keyboard.up('KeyA')
+			})
+
+			it('KeyA fires once on repeat keydown', async () => {
+				await expectToTrigger('KeyA', 0)
+				await page.keyboard.down('KeyA')
+				await page.waitForTimeout(5)
+				await page.keyboard.down('KeyA')
+				await page.waitForTimeout(5)
+				await page.keyboard.down('KeyA')
+				await page.waitForTimeout(5)
+				await page.keyboard.down('KeyA')
+				await page.waitForTimeout(5)
 
 				await expectToTrigger('KeyA', 1)
 				await page.keyboard.up('KeyA')
@@ -58,6 +75,9 @@ describe('Sørensen.bind', () => {
 					await bindCombo('KeyZ', {
 						global: true,
 					})
+					await bindCombo('KeyX+KeyK', {
+						global: true,
+					})
 				})
 				it("KeyY doesn't fire when inside an input element", async () => {
 					await page.focus('input')
@@ -75,6 +95,40 @@ describe('Sørensen.bind', () => {
 
 					await expectToTrigger('KeyZ', 1)
 					await page.keyboard.up('KeyZ')
+				})
+
+				it.only("KeyX doesn't cause input into an input element, when pressing KeyX+KeyK", async () => {
+					await page.focus('input')
+					await expectToTrigger('KeyX+KeyK', 0)
+					await page.keyboard.down('KeyX')
+					await page.waitForTimeout(5)
+					await page.keyboard.down('KeyX')
+					await page.waitForTimeout(5)
+					await page.keyboard.down('KeyX')
+					await page.waitForTimeout(5)
+					await page.keyboard.down('KeyK')
+					await page.waitForTimeout(5)
+					await page.keyboard.down('KeyK')
+					await page.waitForTimeout(5)
+					await page.keyboard.down('KeyK')
+					await page.waitForTimeout(5)
+					await page.keyboard.press('KeyA', {
+						delay: 5,
+					})
+					await page.keyboard.press('KeyB', {
+						delay: 5,
+					})
+					await page.keyboard.press('KeyC', {
+						delay: 5,
+					})
+
+					const inputValue = await page.evaluate(() => document.querySelector('input')?.value)
+					// "abc" should still come through, "xxxkkk" should be prevented
+					expect(inputValue).toBe('abc')
+					// KeyX+KeyK should be triggered once
+					await expectToTrigger('KeyX+KeyK', 1)
+					await page.keyboard.up('KeyK')
+					await page.keyboard.up('KeyX')
 				})
 
 				afterAll(async () => {
