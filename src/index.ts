@@ -32,6 +32,8 @@ let keysDown: string[] = []
 const DEFAULT_CHORD_TIMEOUT = 2000
 let CHORD_TIMEOUT = DEFAULT_CHORD_TIMEOUT
 
+const SORENSEN_IMMEDIATE_PROPAGATION_STOPPED = Symbol('sorensen_immediatePropagationStopped')
+
 export interface BindOptions {
 	/** Only fire this hotkey if no other keys are pressed.
 	 *  Default: true
@@ -74,6 +76,13 @@ export interface BindOptions {
 	 * Default: true
 	 */
 	preventDefaultPartials?: boolean
+
+	/**
+	 * Insert this binding at the top of the bindings list, allowing it to prevent other bindings from running by
+	 * using .stopImmediatePropagation() on the KeyboardEvent object.
+	 * Default: false
+	 */
+	prepend?: boolean
 }
 
 const MODIFIER_KEYS = [
@@ -98,7 +107,7 @@ export const VIRTUAL_ANY_POSITION_KEYS: Record<string, string[]> = {
 	Ctrl: ['ControlLeft', 'ControlRight'],
 	Alt: ['AltLeft', 'AltRight'],
 	Meta: ['MetaLeft', 'MetaRight'],
-	AnyEnter: ['Enter', 'NumpadEnter'],
+	AnyEnter: ['Enter'],
 	Option: ['AltLeft', 'AltRight'],
 	Command: ['OSLeft', 'OSRight'],
 	Windows: ['OSLeft', 'OSRight'],
@@ -140,11 +149,19 @@ function bind(combo: string | string[], listener: (e: EnchancedKeyboardEvent) =>
 		if (!item.length || !item[0].length) {
 			throw new Error('Combo needs to have at least a single key in it')
 		}
-		bound.push({
-			combo: item,
-			listener,
-			...options,
-		})
+		if (options?.prepend) {
+			bound.unshift({
+				combo: item,
+				listener,
+				...options,
+			})
+		} else {
+			bound.push({
+				combo: item,
+				listener,
+				...options,
+			})
+		}
 	})
 }
 
@@ -275,7 +292,7 @@ function isAllowedToExecute(binding: ComboBinding, e: KeyboardEvent): boolean {
 }
 
 function callListenerIfAllowed(binding: ComboBinding, e: KeyboardEvent, note = 0) {
-	if (!isAllowedToExecute(binding, e)) {
+	if (!isAllowedToExecute(binding, e) || (e as any)[SORENSEN_IMMEDIATE_PROPAGATION_STOPPED]) {
 		return
 	}
 
@@ -284,6 +301,11 @@ function callListenerIfAllowed(binding: ComboBinding, e: KeyboardEvent, note = 0
 			comboChordCodes: binding.combo,
 			comboCodes: binding.combo[note],
 			tag: binding.tag,
+			[SORENSEN_IMMEDIATE_PROPAGATION_STOPPED]: false,
+			stopImmediatePropagation: () => {
+				;(e as any)[SORENSEN_IMMEDIATE_PROPAGATION_STOPPED] = true
+				e.stopImmediatePropagation()
+			},
 		})
 	)
 }
