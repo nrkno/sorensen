@@ -36,6 +36,9 @@ sorensen.bind('Tab+KeyT', (e) => {
 	ordered: true,
 	exclusive: true
 })
+sorensen.addEventListener('layoutchange', () => {
+	console.log(`KeyQ now has label: "${sorensen.getKeyForCode('KeyQ')}"`)
+})
 ```
 
 For a comprehensive list of possible KeyboardEvent code values and their corresponding keys see [KeyboardEvent: code values](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/code/code_values) on MDN.

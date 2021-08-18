@@ -492,6 +492,7 @@ async function getKeyboardLayoutMap() {
 	if ('keyboard' in navigator && typeof navigator.keyboard.getLayoutMap === 'function') {
 		try {
 			keyboardLayoutMap = await navigator.keyboard.getLayoutMap()
+			dispatchEvent('layoutchange')
 		} catch (e) {
 			console.error('Could not get keyboard layout map.', e)
 		}
@@ -601,6 +602,39 @@ async function destroy() {
 	}
 }
 
+type EventHandler = () => void
+
+const eventListeners: Record<string, EventHandler[]> = {}
+
+function dispatchEvent(event: 'layoutchange'): void
+function dispatchEvent(event: string) {
+	if (Array.isArray(eventListeners[event])) {
+		eventListeners[event].forEach((handler) => {
+			try {
+				handler()
+			} catch (e) {
+				// simulate the behavior of an exception reaching top-level
+				console.error(e)
+			}
+		})
+	}
+}
+
+function addEventListener(event: 'layoutchange', handler: EventHandler): void
+function addEventListener(event: string, handler: EventHandler): void {
+	if (eventListeners[event] === undefined) {
+		eventListeners[event] = []
+	}
+	eventListeners[event].push(handler)
+}
+
+function removeEventListener(event: 'layoutchange', handler: EventHandler): void
+function removeEventListener(event: string, handler: EventHandler): void {
+	if (Array.isArray(eventListeners[event])) {
+		eventListeners[event] = eventListeners[event].filter((someHandler) => someHandler !== handler)
+	}
+}
+
 const sorensen = {
 	init,
 	destroy,
@@ -610,6 +644,8 @@ const sorensen = {
 	bind,
 	unbind,
 	poison,
+	addEventListener,
+	removeEventListener,
 }
 
 if (window) {
