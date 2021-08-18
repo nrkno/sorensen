@@ -35,6 +35,10 @@ let CHORD_TIMEOUT = DEFAULT_CHORD_TIMEOUT
 const SORENSEN_IMMEDIATE_PROPAGATION_STOPPED = Symbol('sorensen_immediatePropagationStopped')
 const SORENSEN_STOP_IMMEDIATE_PROPAGATION = Symbol('sorensen_stopImmediatePropagation')
 
+function isMac() {
+	return /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)
+}
+
 export interface BindOptions {
 	/** Only fire this hotkey if no other keys are pressed.
 	 *  Default: true
@@ -112,6 +116,7 @@ export const VIRTUAL_ANY_POSITION_KEYS: Record<string, string[]> = {
 	Option: ['AltLeft', 'AltRight'],
 	Command: ['OSLeft', 'OSRight'],
 	Windows: ['OSLeft', 'OSRight'],
+	Accel: isMac() ? ['OSLeft', 'OSRight'] : ['ControlLeft', 'ControlRight'],
 }
 const INVERSE_VIRTUAL_ANY_POSITION_KEYS: Record<string, string> = {}
 Object.entries(VIRTUAL_ANY_POSITION_KEYS).forEach((entry) => {
@@ -406,10 +411,8 @@ function cleanUpKeyRepeatIgnoreKeys(e?: KeyboardEvent) {
 	}
 }
 
-function preventAllDefaults(e: KeyboardEvent) {
+function preventDefault(e: KeyboardEvent) {
 	e.preventDefault()
-	e.stopPropagation()
-	e.stopImmediatePropagation()
 }
 
 function overloadEventStopImmediatePropagation(e: KeyboardEvent) {
@@ -474,7 +477,7 @@ function keyDown(e: KeyboardEvent) {
 		clearChordTimeout()
 	}
 	if (keyRepeatIgnoreKeys.includes(e.code)) {
-		preventAllDefaults(e)
+		preventDefault(e)
 	}
 }
 

@@ -37,3 +37,20 @@ sorensen.bind('Tab+KeyT', (e) => {
 	exclusive: true
 })
 ```
+
+For a comprehensive list of possible KeyboardEvent code values and their corresponding keys see [KeyboardEvent: code values](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/code/code_values) on MDN.
+
+Additionally, Sørensen allows special, "virtual" codes, for conveniance when using modifiers and the Enter key. These are:
+
+| Virtual Code | Matching real Codes                                                               |
+| ------------ | --------------------------------------------------------------------------------- |
+| `Shift`      | `ShiftLeft`, `ShiftRight`                                                         |
+| `Control`    | `ControlLeft`, `ControlRight`                                                     |
+| `Ctrl`       | `ControlLeft`, `ControlRight`                                                     |
+| `Alt`        | `AltLeft`, `AltRight`                                                             |
+| `Meta`       | `MetaLeft`, `MetaRight`                                                           |
+| `AnyEnter`   | `Enter`, `NumpadEnter`                                                            |
+| `Option`     | `AltLeft`, `AltRight`                                                             |
+| `Command`    | `OSLeft`, `OSRight`                                                               |
+| `Windows`    | `OSLeft`, `OSRight`                                                               |
+| `Accel`      | on a Mac-like sytstem: `OSLeft`, `OSRight`, others: `ControlLeft`, `ControlRight` |
