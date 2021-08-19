@@ -5,8 +5,8 @@ jest.setTimeout(300000)
 describe('Sørensen.bind', () => {
 	describe('keydown', () => {
 		beforeAll(async () => {
-			await page.goto('http://localhost:9000/index.html')
-			await page.waitForTimeout(300)
+			await Promise.all([page.goto('http://localhost:9000/index.html'), page.waitForNavigation()])
+			await page.waitForTimeout(500)
 		})
 
 		beforeEach(async () => {
@@ -79,6 +79,16 @@ describe('Sørensen.bind', () => {
 						global: true,
 					})
 				})
+
+				beforeEach(async () => {
+					await page.evaluate(() => {
+						const input = document.querySelector('input')
+						if (input) {
+							input.value = ''
+						}
+					})
+				})
+
 				it("KeyY doesn't fire when inside an input element", async () => {
 					await page.focus('input')
 					await expectToTrigger('KeyY', 0)
