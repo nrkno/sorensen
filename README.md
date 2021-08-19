@@ -14,19 +14,19 @@ Just install the library using your package manager of choice. Sørensen has no 
 a reasonably modern browser, as it uses ES7 features.
 
 ```
-npm i --save sorensen
+npm i --save @sofie-automation/sorensen
 ```
 or:
 
 ```
-yarn add sorensen
+yarn add @sofie-automation/sorensen
 ```
 
 Use
 ---
 
 ```javascript
-import sorensen from 'sorensen'
+import sorensen from '@sofie-automation/sorensen'
 await sorensen.init()
 sorensen.bind('Tab+KeyT', (e) => {
 	// Sorensen extends the KeyboardEvent object with `comboChordCodes` and `comboCodes`
