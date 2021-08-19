@@ -3,7 +3,12 @@
   "version": "1.1.1",
   "description": "A modern, i18n-friendly hotkey library for the Web",
   "main": "dist/sorensen.js",
-  "typings": "dist/index.d.ts",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/index.d.ts",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "author": "Jan Starzak <jan.starzak@nrk.no>",
   "license": "MIT",
   "scripts": {
