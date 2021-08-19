@@ -77,7 +77,8 @@ jobs:
       - name: Publish to NPM
         if: ${{ steps.do-publish.outputs.tag }}
         run: |
-          yarn config set _authToken ${{ secrets.NPM_TOKEN }}
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+          echo "registry: https://registry.npmjs.org/" >> .yarnrc
           yarn publish --tag ${{ steps.do-publish.outputs.tag }} --yes
         env:
           CI: true
