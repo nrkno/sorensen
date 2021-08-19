@@ -42,7 +42,7 @@ function isMac() {
 
 export interface BindOptions {
 	/** Only fire this hotkey if no other keys are pressed.
-	 *  Default: true
+	 *  Default: `true`
 	 */
 	exclusive?: boolean
 	/**
@@ -52,7 +52,7 @@ export interface BindOptions {
 	 */
 	global?: boolean | ((e: KeyboardEvent, combo: string) => boolean)
 	/** Fire this hotkey after a key is depressed from the combo.
-	 *  Default: false
+	 *  Default: `false`
 	 */
 	up?: boolean
 	/** Keys must be pressed in the order given in the combo for the hotkey to fire.
@@ -60,7 +60,7 @@ export interface BindOptions {
 	 *  `modifiersFirst` means that modifiers need to be activated first, in any order, and then subsequent keys
 	 *  must be pressed in order.
 	 *
-	 *  Default: false
+	 *  Default: `false`
 	 */
 	ordered?: boolean | 'modifiersFirst'
 
@@ -68,7 +68,7 @@ export interface BindOptions {
 	 * If this is enabled, events on modifier keys (keyup or keydown, depending on the binding direction), will cause
 	 * a chord in progress to be poisoned and terminated.
 	 *
-	 * Default: false
+	 * Default: `false`
 	 */
 	modifiersPoisonChord?: boolean
 
@@ -79,14 +79,14 @@ export interface BindOptions {
 
 	/**
 	 * Prevent default behavior on any partial matches and key repeats
-	 * Default: true
+	 * Default: `true`
 	 */
 	preventDefaultPartials?: boolean
 
 	/**
 	 * Insert this binding at the top of the bindings list, allowing it to prevent other bindings from running by
 	 * using .stopImmediatePropagation() on the KeyboardEvent object.
-	 * Default: false
+	 * Default: `false`
 	 */
 	prepend?: boolean
 }
@@ -138,7 +138,8 @@ function stringifyCombo(combo: ComboChord): string {
 /**
  * Bind a combo or set of combos to a given event listener.
  *
- * @param {(string | string[])} combo
+ * @param {(string | string[])} combo A combo or chord to be bound, specified using keybaord button code values.
+ * 		Whitespace separates multiple notes in a chord. `+` means key combinations.
  * @param {(e: EnchancedKeyboardEvent) => void} listener
  * @param {BindOptions} [options]
  */
@@ -176,7 +177,7 @@ function bind(combo: string | string[], listener: (e: EnchancedKeyboardEvent) =>
  * Unbind a combo from a given event listener. If a `tag` is provided, only bindings with a strictly equal binding will
  * be removed
  *
- * @param {string} combo
+ * @param {string} combo A combo bound to the `listener`.
  * @param {(e: EnchancedKeyboardEvent) => void} [listener]
  */
 function unbind(combo: string, listener?: (e: EnchancedKeyboardEvent) => void, tag?: any): void {
@@ -503,6 +504,11 @@ async function getKeyboardLayoutMap() {
 	}
 }
 
+/**
+ * Get the keys currently being pressed
+ *
+ * @return {*}  {string[]} A list of key button codes.
+ */
 function getPressedKeys(): string[] {
 	return [...keysDown]
 }
@@ -510,8 +516,8 @@ function getPressedKeys(): string[] {
 /**
  * Figure out the physical key code for a given label.
  *
- * @param {string} key
- * @return {*}  {(string | undefined)}
+ * @param {string} key The label of a key
+ * @return {*}  {(string | undefined)} Key code
  */
 function getCodeForKey(key: string): string | undefined {
 	if (key.length === 1) {
@@ -530,8 +536,8 @@ function getCodeForKey(key: string): string | undefined {
 /**
  * Fetch the key label on the given physical key.
  *
- * @param {string} code
- * @return {*}  {string}
+ * @param {string} code Key button code
+ * @return {*}  {string} Label on the key with the current keyboard layout.
  */
 function getKeyForCode(code: string): string {
 	if (keyboardLayoutMap) {
@@ -630,6 +636,13 @@ function dispatchEvent(event: string) {
 	}
 }
 
+/**
+ * When Keyboard Layout API sends an event notifying the keyboard layout has changed, Sørensen will fetch the new
+ * keyboard layout map and dispatch this event when it's ready.
+ *
+ * @param {'layoutchange'} event
+ * @param {EventHandler} handler
+ */
 function addEventListener(event: 'layoutchange', handler: EventHandler): void
 function addEventListener(event: string, handler: EventHandler): void {
 	if (eventListeners[event] === undefined) {
@@ -657,6 +670,8 @@ const sorensen = {
 	addEventListener,
 	removeEventListener,
 }
+
+export type Sorensen = typeof sorensen
 
 if (window) {
 	//@ts-ignore this is to work around a bug in webpack DevServer

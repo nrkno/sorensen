@@ -9,6 +9,7 @@
   "scripts": {
     "start": "webpack serve --env dev",
     "build": "yarn bundle",
+    "docs": "yarn typedoc",
     "lint": "eslint . --ext .ts --ext .js --ext .tsx --ext .jsx --ignore-pattern dist",
     "lint-fix": "yarn lint --fix",
     "format": "prettier --write --config \"./.prettierrc.json\" \"src/**\"",
@@ -27,6 +28,7 @@
     "@types/expect-puppeteer": "^4.4.6",
     "@types/jest": "^26.0.24",
     "@types/jest-environment-puppeteer": "^4.4.1",
+    "@types/node": "^14.0.0",
     "concurrently": "^6.2.0",
     "expect-puppeteer": "^5.0.4",
     "jest": "^27.0.6",
@@ -40,6 +42,7 @@
     "webpack": "^4.46.0",
     "webpack-cli": "4.5.0",
     "webpack-dev-server": "3.11.2",
+    "typedoc": "^0.20.33",
     "yargs": "^17.0.1"
   },
   "prettier": "@sofie-automation/code-standard-preset/.prettierrc.json",
