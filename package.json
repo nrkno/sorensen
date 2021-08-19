@@ -1,5 +1,5 @@
 {
-  "name": "sorensen",
+  "name": "@sofie-automation/sorensen",
   "version": "1.0.0",
   "description": "A modern, i18n-friendly hotkey library for the Web",
   "main": "dist/sorensen.js",
