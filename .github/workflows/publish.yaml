@@ -78,6 +78,6 @@ jobs:
         run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
           echo "registry: https://registry.npmjs.org/" >> .yarnrc
-          yarn publish --tag ${{ steps.do-publish.outputs.publish }} --yes
+          yarn publish --access public --tag ${{ steps.do-publish.outputs.publish }} --yes
         env:
           CI: true
