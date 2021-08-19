@@ -1,0 +1,187 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Sørensen</title>
+	<meta name="description" content="Documentation for Sørensen">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+	<script async src="assets/js/search.js" id="search-script"></script>
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.json" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">Sørensen</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<h1>Sørensen</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<a href="#sørensen" id="sørensen" style="color: inherit; text-decoration: none;">
+					<h1>Sørensen</h1>
+				</a>
+				<p>Sørensen is a modern, i18n-friendly hotkey library for the Web. By <em>modern</em>, we mean that it uses the
+					<code>KeyboardEvent.code</code> property for matching keys. That means that physical keys, as opposed to the
+					character produced by the key, is used for defining key bindings. Other <code>KeyboardEvent</code> properties tend to be very
+					flaky, because they can change depending on the Keyboard Mapping used. By <em>i18n-friendly</em>, we mean that it
+					provides utility methods that use the Keyboard Map API to convert between key <code>code</code> values and strings to be
+				presented to the user, such as converting a <code>KeyQ</code> value to <code>A</code> on a French keyboard, and then converting <code>Z</code> to <code>KeyW</code>.</p>
+				<a href="#install" id="install" style="color: inherit; text-decoration: none;">
+					<h2>Install</h2>
+				</a>
+				<p>Just install the library using your package manager of choice. Sørensen has no external dependenices, but it assumes
+				a reasonably modern browser, as it uses ES7 features.</p>
+				<pre><code><span style="color: #001080">npm</span><span style="color: #000000"> </span><span style="color: #001080">i</span><span style="color: #000000"> --</span><span style="color: #001080">save</span><span style="color: #000000"> @</span><span style="color: #001080">sofie</span><span style="color: #000000">-</span><span style="color: #001080">automation</span><span style="color: #000000">/</span><span style="color: #001080">sorensen</span>
+</code></pre>
+				<p>or:</p>
+				<pre><code><span style="color: #001080">yarn</span><span style="color: #000000"> </span><span style="color: #001080">add</span><span style="color: #000000"> @</span><span style="color: #001080">sofie</span><span style="color: #000000">-</span><span style="color: #001080">automation</span><span style="color: #000000">/</span><span style="color: #001080">sorensen</span>
+</code></pre>
+				<a href="#use" id="use" style="color: inherit; text-decoration: none;">
+					<h2>Use</h2>
+				</a>
+				<pre><code class="language-javascript"><span style="color: #AF00DB">import</span><span style="color: #000000"> </span><span style="color: #001080">sorensen</span><span style="color: #000000"> </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;@sofie-automation/sorensen&#039;</span>
+<span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">sorensen</span><span style="color: #000000">.</span><span style="color: #795E26">init</span><span style="color: #000000">()</span>
+<span style="color: #001080">sorensen</span><span style="color: #000000">.</span><span style="color: #795E26">bind</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;Tab+KeyT&#039;</span><span style="color: #000000">, (</span><span style="color: #001080">e</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
+<span style="color: #000000">    </span><span style="color: #008000">// Sorensen extends the KeyboardEvent object with `comboChordCodes` and `comboCodes`</span>
+<span style="color: #000000">    </span><span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #001080">e</span><span style="color: #000000">)</span>
+<span style="color: #000000">    </span><span style="color: #001080">e</span><span style="color: #000000">.</span><span style="color: #795E26">preventDefault</span><span style="color: #000000">()</span>
+<span style="color: #000000">}, {</span>
+<span style="color: #000000">    </span><span style="color: #001080">ordered:</span><span style="color: #000000"> </span><span style="color: #0000FF">true</span><span style="color: #000000">,</span>
+<span style="color: #000000">    </span><span style="color: #001080">exclusive:</span><span style="color: #000000"> </span><span style="color: #0000FF">true</span>
+<span style="color: #000000">})</span>
+</code></pre>
+				<p>For a comprehensive list of possible KeyboardEvent code values and their corresponding keys see <a href="https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/code/code_values">KeyboardEvent: code values</a> on MDN.</p>
+				<p>Additionally, Sørensen allows special, &quot;virtual&quot; codes, for conveniance when using modifiers and the Enter key. These are:</p>
+				<table>
+					<thead>
+						<tr>
+							<th>Virtual Code</th>
+							<th>Matching real Codes</th>
+						</tr>
+					</thead>
+					<tbody><tr>
+							<td><code>Shift</code></td>
+							<td><code>ShiftLeft</code>, <code>ShiftRight</code></td>
+						</tr>
+						<tr>
+							<td><code>Control</code></td>
+							<td><code>ControlLeft</code>, <code>ControlRight</code></td>
+						</tr>
+						<tr>
+							<td><code>Ctrl</code></td>
+							<td><code>ControlLeft</code>, <code>ControlRight</code></td>
+						</tr>
+						<tr>
+							<td><code>Alt</code></td>
+							<td><code>AltLeft</code>, <code>AltRight</code></td>
+						</tr>
+						<tr>
+							<td><code>Meta</code></td>
+							<td><code>MetaLeft</code>, <code>MetaRight</code></td>
+						</tr>
+						<tr>
+							<td><code>AnyEnter</code></td>
+							<td><code>Enter</code>, <code>NumpadEnter</code></td>
+						</tr>
+						<tr>
+							<td><code>Option</code></td>
+							<td><code>AltLeft</code>, <code>AltRight</code></td>
+						</tr>
+						<tr>
+							<td><code>Command</code></td>
+							<td><code>OSLeft</code>, <code>OSRight</code></td>
+						</tr>
+						<tr>
+							<td><code>Windows</code></td>
+							<td><code>OSLeft</code>, <code>OSRight</code></td>
+						</tr>
+						<tr>
+							<td><code>Accel</code></td>
+							<td>on a Mac-like sytstem: <code>OSLeft</code>, <code>OSRight</code>, others: <code>ControlLeft</code>, <code>ControlRight</code></td>
+						</tr>
+				</tbody></table>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class=" ">
+						<a href="modules.html">Exports</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/bindoptions.html" class="tsd-kind-icon">Bind<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="modules.html#sorensen" class="tsd-kind-icon">Sorensen</a>
+					</li>
+					<li class=" tsd-kind-variable">
+						<a href="modules.html#virtual_any_position_keys" class="tsd-kind-icon">VIRTUAL_<wbr>ANY_<wbr>POSITION_<wbr>KEYS</a>
+					</li>
+					<li class=" tsd-kind-variable">
+						<a href="modules.html#default" class="tsd-kind-icon">default</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
