@@ -97,7 +97,7 @@ describe('Sørensen.bind', () => {
 					await page.keyboard.up('KeyZ')
 				})
 
-				it.only("KeyX doesn't cause input into an input element, when pressing KeyX+KeyK", async () => {
+				it("KeyX doesn't cause input into an input element, when pressing KeyX+KeyK", async () => {
 					await page.focus('input')
 					await expectToTrigger('KeyX+KeyK', 0)
 					await page.keyboard.down('KeyX')
