@@ -2,7 +2,7 @@ const path = require('path')
 const pkg = require('./package.json')
 const env = require('yargs').argv.env
 
-const libraryName = pkg.name
+const libraryName = 'sorensen'
 const libraryObjName = 'sorensen'
 
 module.exports = {
