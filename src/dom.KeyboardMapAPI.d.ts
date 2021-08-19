@@ -15,6 +15,9 @@ declare module 'dom.keyboardMapAPI' {
 			// Returns a Promise that resolves with an instance of KeyboardLayoutMap which is a map-like object with
 			// functions for retrieving the strings associated with specific physical keys
 			getLayoutMap(): Promise<KeyboardLayoutMap>
+
+			addEventListener(event: 'layoutchange', handler: () => void): void
+			removeEventListener(event: 'layoutchange', handler: () => void): void
 		}
 
 		interface KeyboardLayoutMap extends Map<string, string> {}

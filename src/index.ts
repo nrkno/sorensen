@@ -28,6 +28,7 @@ let keyUpIgnoreKeys: string[] = []
 let keyRepeatIgnoreKeys: string[] = []
 let chordsInProgress: ChordInProgress[] = []
 let keysDown: string[] = []
+let poisoned: boolean = false
 
 const DEFAULT_CHORD_TIMEOUT = 2000
 let CHORD_TIMEOUT = DEFAULT_CHORD_TIMEOUT
@@ -442,26 +443,26 @@ function clearChordTimeout() {
  *
  */
 function poison() {
-	keysDown.length = 0
 	chordsInProgress.length = 0
+	poisoned = true
 }
 
 function keyUp(e: KeyboardEvent) {
-	let idx = -1
-	do {
-		idx = keysDown.indexOf(e.code)
-		if (idx >= 0) {
-			keysDown.splice(idx, 1)
-		}
-	} while (idx >= 0)
-
-	e = overloadEventStopImmediatePropagation(e)
-	visitChordsInProgress(e.code, true, e)
-	visitBoundCombos(e.code, true, e)
+	keysDown = keysDown.filter((key) => key !== e.code)
+	if (!poisoned) {
+		e = overloadEventStopImmediatePropagation(e)
+		visitChordsInProgress(e.code, true, e)
+		visitBoundCombos(e.code, true, e)
+	}
 	cleanUpFinishedChords()
 	setupChordTimeout()
 	cleanUpKeyUpIgnoreKeys()
 	cleanUpKeyRepeatIgnoreKeys(e)
+
+	if (poisoned && keysDown.length === 0) {
+		poisoned = false
+	}
+
 	// DEBUG: console.log(chordsInProgress)
 }
 
@@ -470,9 +471,11 @@ function keyDown(e: KeyboardEvent) {
 		keysDown.push(e.code)
 		// DEBUG: console.log(keysDown)
 
-		e = overloadEventStopImmediatePropagation(e)
-		visitChordsInProgress(e.code, false, e)
-		visitBoundCombos(e.code, false, e)
+		if (!poisoned) {
+			e = overloadEventStopImmediatePropagation(e)
+			visitChordsInProgress(e.code, false, e)
+			visitBoundCombos(e.code, false, e)
+		}
 		cleanUpFinishedChords()
 		clearChordTimeout()
 	}
@@ -485,6 +488,7 @@ function visibilityChange() {
 	if ('visibilityState' in document && document.visibilityState === 'hidden') {
 		// reset keysDown when user moved away from the page
 		keysDown.length = 0
+		poisoned = false
 	}
 }
 
@@ -571,8 +575,11 @@ async function init(options?: { chordTimeout?: number }) {
 			passive: false,
 			capture: true,
 		})
-		window.addEventListener('layoutchange', getKeyboardLayoutMap)
 		window.addEventListener('visibilitychange', visibilityChange)
+
+		if ('keyboard' in navigator && typeof navigator.keyboard.addEventListener === 'function') {
+			navigator.keyboard.addEventListener('layoutchange', getKeyboardLayoutMap)
+		}
 		await getKeyboardLayoutMap()
 
 		bound = []
@@ -593,8 +600,11 @@ async function destroy() {
 	if (initialized) {
 		window.removeEventListener('keyup', keyUp)
 		window.removeEventListener('keydown', keyDown)
-		window.removeEventListener('layoutchange', getKeyboardLayoutMap)
 		window.removeEventListener('visibilitychange', visibilityChange)
+
+		if ('keyboard' in navigator && typeof navigator.keyboard.removeEventListener === 'function') {
+			navigator.keyboard.removeEventListener('layoutchange', getKeyboardLayoutMap)
+		}
 
 		initialized = false
 	} else {
