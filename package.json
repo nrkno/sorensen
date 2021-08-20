@@ -11,6 +11,18 @@
   ],
   "author": "Jan Starzak <jan.starzak@nrk.no>",
   "license": "MIT",
+  "keywords": [
+    "keyboard",
+    "browser",
+    "shortcuts",
+    "combo",
+    "hotkey",
+    "user interface",
+    "keyboard api",
+    "web platform",
+    "i18n",
+    "keyboard layout"
+  ],
   "scripts": {
     "start": "webpack serve --env dev",
     "build": "yarn bundle",
