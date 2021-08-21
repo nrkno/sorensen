@@ -529,6 +529,14 @@ function getCodeForKey(key: string): string | undefined {
 				return code
 			}
 		}
+	} else {
+		if (key.match(/^\d+$/)) {
+			return `Digit${key}`
+		} else if (key.match(/^\w$/)) {
+			return `Key${key}`
+		} else {
+			return `${key}`
+		}
 	}
 	return undefined
 }
