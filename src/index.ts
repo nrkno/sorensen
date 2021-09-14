@@ -488,9 +488,12 @@ function keyDown(e: KeyboardEvent) {
 function visibilityChange() {
 	if ('visibilityState' in document && document.visibilityState === 'hidden') {
 		// reset keysDown when user moved away from the page
-		keysDown.length = 0
-		poisoned = false
+		clearPressedKeys()
 	}
+}
+
+function windowBlur() {
+	clearPressedKeys()
 }
 
 async function getKeyboardLayoutMap() {
@@ -511,6 +514,11 @@ async function getKeyboardLayoutMap() {
  */
 function getPressedKeys(): string[] {
 	return [...keysDown]
+}
+
+function clearPressedKeys(): void {
+	keysDown.length = 0
+	poisoned = false
 }
 
 /**
@@ -590,6 +598,8 @@ async function init(options?: { chordTimeout?: number }) {
 			capture: true,
 		})
 		window.addEventListener('visibilitychange', visibilityChange)
+		window.addEventListener('blur', windowBlur)
+		window.addEventListener('pagehide', windowBlur)
 
 		if ('keyboard' in navigator && typeof navigator.keyboard.addEventListener === 'function') {
 			navigator.keyboard.addEventListener('layoutchange', getKeyboardLayoutMap)
@@ -615,6 +625,8 @@ async function destroy() {
 		window.removeEventListener('keyup', keyUp)
 		window.removeEventListener('keydown', keyDown)
 		window.removeEventListener('visibilitychange', visibilityChange)
+		window.removeEventListener('blur', windowBlur)
+		window.removeEventListener('pagehide', windowBlur)
 
 		if ('keyboard' in navigator && typeof navigator.keyboard.removeEventListener === 'function') {
 			navigator.keyboard.removeEventListener('layoutchange', getKeyboardLayoutMap)
