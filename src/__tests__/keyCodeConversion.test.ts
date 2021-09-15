@@ -6,8 +6,7 @@ async function getKeyForCode(code: string): Promise<string> {
 
 describe('Sørensen.getKeyForCode', () => {
 	beforeAll(async () => {
-		await page.goto('http://localhost:9000/index.html')
-		await page.waitForTimeout(300)
+		await Promise.all([page.goto('http://localhost:9000/index.html'), page.waitForNavigation()])
 	})
 
 	// these tests assume running on an US-English machine

@@ -2,8 +2,7 @@ import expectPuppet from 'expect-puppeteer'
 
 describe('Global object injection', () => {
 	beforeAll(async () => {
-		await page.goto('http://localhost:9000/index.html')
-		await page.waitForTimeout(300)
+		await Promise.all([page.goto('http://localhost:9000/index.html'), page.waitForNavigation()])
 	})
 
 	it('should expose global object', async () => {

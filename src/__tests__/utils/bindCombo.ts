@@ -5,6 +5,10 @@ export async function bindCombo(combo: string, options?: BindOptions) {
 	await page.evaluate<string>(`bindCombo(${JSON.stringify(combo)}, ${JSON.stringify(options || {})})`)
 }
 
+export async function getPressedKeys() {
+	return await page.evaluate<string>(`sorensen.getPressedKeys()`).then((val) => val as string)
+}
+
 export async function expectToTrigger(combo: string, count: number) {
 	await expectPuppet(page).toMatchElement(`#result .binding[data-combo="${combo}"] .hit`, {
 		text: count.toString(),

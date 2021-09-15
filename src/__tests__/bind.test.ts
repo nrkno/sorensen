@@ -6,7 +6,8 @@ describe('Sørensen.bind', () => {
 	describe('keydown', () => {
 		beforeAll(async () => {
 			await Promise.all([page.goto('http://localhost:9000/index.html'), page.waitForNavigation()])
-			await page.waitForTimeout(500)
+
+			await page.bringToFront()
 		})
 
 		beforeEach(async () => {
