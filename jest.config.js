@@ -10,5 +10,6 @@ module.exports = {
 	"transform": {
 		"^.+\\.(ts|tsx)$": "ts-jest"
 	},
-	"setupFilesAfterEnv": ["expect-puppeteer"]
+	"setupFilesAfterEnv": ["expect-puppeteer"],
+	"silent": false,
 }

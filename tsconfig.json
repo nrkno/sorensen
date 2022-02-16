@@ -5,7 +5,7 @@
 	"compilerOptions": {
 		"sourceMap": true,
 		"module": "UMD",
-		"lib": ["dom", "es6", "es2016"],
+		"lib": ["dom", "es6", "es2017"],
 		"types": ["jest", "@types/jest-environment-puppeteer"],
 		"esModuleInterop": true
 	},
