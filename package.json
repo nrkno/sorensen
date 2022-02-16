@@ -11,13 +11,13 @@
   ],
   "author": "Jan Starzak <jan.starzak@nrk.no>",
   "repository": {
-		"type": "git",
-		"url": "git+https://github.com/nrkno/sorensen.git"
-	},
-	"bugs": {
-		"url": "https://github.com/nrkno/sorensen/issues"
-	},
-	"homepage": "https://github.com/nrkno/sorensen#readme",
+    "type": "git",
+    "url": "git+https://github.com/nrkno/sorensen.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nrkno/sorensen/issues"
+  },
+  "homepage": "https://nrkno.github.io/sorensen/",
   "license": "MIT",
   "keywords": [
     "keyboard",

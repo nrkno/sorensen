@@ -314,8 +314,8 @@ function callListenerIfAllowed(binding: ComboBinding, e: KeyboardEvent, note = 0
 				if ((e as any)[SORENSEN_IMMEDIATE_PROPAGATION_STOPPED]) {
 					return
 				}
-				;(e as any)[SORENSEN_IMMEDIATE_PROPAGATION_STOPPED] = true
-				;(e as any)[SORENSEN_STOP_IMMEDIATE_PROPAGATION]()
+				; (e as any)[SORENSEN_IMMEDIATE_PROPAGATION_STOPPED] = true
+					; (e as any)[SORENSEN_STOP_IMMEDIATE_PROPAGATION]()
 			},
 		})
 	)
@@ -517,6 +517,10 @@ function getPressedKeys(): string[] {
 }
 
 function clearPressedKeys(): void {
+	// inform potential listeners about cancelled keys
+	keysDown.forEach((code) => dispatchEvent("keycancel", {
+		code
+	}))
 	keysDown.length = 0
 	poisoned = false
 }
@@ -639,15 +643,21 @@ async function destroy() {
 }
 
 type EventHandler = () => void
+type EventHandlerWithArgs<T extends any> = (args: T) => void
 
-const eventListeners: Record<string, EventHandler[]> = {}
+type KeyboardCancelEvent = {
+	code: string
+}
+
+const eventListeners: Record<string, (EventHandler | EventHandlerWithArgs<any>)[]> = {}
 
 function dispatchEvent(event: 'layoutchange'): void
-function dispatchEvent(event: string) {
+function dispatchEvent(event: 'keycancel', args: KeyboardCancelEvent): void
+function dispatchEvent(event: string, args?: any) {
 	if (Array.isArray(eventListeners[event])) {
 		eventListeners[event].forEach((handler) => {
 			try {
-				handler()
+				handler(args)
 			} catch (e) {
 				// simulate the behavior of an exception reaching top-level
 				console.error(e)
@@ -664,7 +674,15 @@ function dispatchEvent(event: string) {
  * @param {EventHandler} handler
  */
 function addEventListener(event: 'layoutchange', handler: EventHandler): void
-function addEventListener(event: string, handler: EventHandler): void {
+/**
+ * When it becomes impossible to track keyup/keydown events on a keyboard, a pressed key can be "cancelled", without
+ * explicitly being released. Such a situation can happen when focus changes while keys are being pressed.
+ *
+ * @param {'keycancel'} event
+ * @param {EventHandler<KeyboardCancelEvent>} handler
+ */
+function addEventListener(event: 'keycancel', handler: EventHandlerWithArgs<KeyboardCancelEvent>): void
+function addEventListener(event: string, handler: EventHandler | EventHandlerWithArgs<any>): void {
 	if (eventListeners[event] === undefined) {
 		eventListeners[event] = []
 	}
@@ -672,7 +690,8 @@ function addEventListener(event: string, handler: EventHandler): void {
 }
 
 function removeEventListener(event: 'layoutchange', handler: EventHandler): void
-function removeEventListener(event: string, handler: EventHandler): void {
+function removeEventListener(event: 'keycancel', handler: EventHandlerWithArgs<KeyboardCancelEvent>): void
+function removeEventListener(event: string, handler: EventHandler | EventHandlerWithArgs<any>): void {
 	if (Array.isArray(eventListeners[event])) {
 		eventListeners[event] = eventListeners[event].filter((someHandler) => someHandler !== handler)
 	}

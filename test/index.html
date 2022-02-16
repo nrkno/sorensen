@@ -38,6 +38,7 @@
 	<input type="text" id="comboLearn" readonly />
 	<button id="attach">Attach</button>
 </div>
+<div id="cancelled-keys"></div>
 
 <script>
 	;(function () {
@@ -67,6 +68,12 @@
 						}
 					)
 				}
+			})
+
+			sorensen.addEventListener('keycancel', (e) => {
+				const el = document.getElementById('cancelled-keys')
+				if (!el) return
+				el.innerText = el.innerText + ',' + e.code
 			})
 		})
 
@@ -101,6 +108,8 @@
 				element.textContent = (0).toString()
 				element.classList.remove('hot')
 			})
+			const cancelled = document.getElementById('cancelled-keys')
+			cancelled.innerText = ''
 		}
 
 		window.bindCombo = bindCombo
