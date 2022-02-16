@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/nrkno/sorensen/compare/v1.2.0...v1.3.0) (2022-02-16)
+
+
+### Features
+
+* send 'keycancel' event when it's not possible to track pressed keys ([e227f0f](https://github.com/nrkno/sorensen/commit/e227f0f526b6dad7c48124b9ce1afb9b70ae4354))
+
 ## [1.2.0](https://github.com/nrkno/simonsson/compare/v1.1.2...v1.2.0) (2021-09-14)
 
 
