@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.1](https://github.com/nrkno/sorensen/compare/v1.3.0...v1.3.1) (2022-03-02)
+
+
+### Bug Fixes
+
+* clear `getPressedKeys()` array before sending out keycancel events ([57c47e1](https://github.com/nrkno/sorensen/commit/57c47e1d6dd76299917738d203479ed7226f1d32))
+
 ## [1.3.0](https://github.com/nrkno/sorensen/compare/v1.2.0...v1.3.0) (2022-02-16)
 
 
