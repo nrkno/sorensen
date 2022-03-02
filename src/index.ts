@@ -518,10 +518,11 @@ function getPressedKeys(): string[] {
 
 function clearPressedKeys(): void {
 	// inform potential listeners about cancelled keys
-	keysDown.forEach((code) => dispatchEvent("keycancel", {
+	const cancelledKeys = keysDown.slice()
+	keysDown.length = 0
+	cancelledKeys.forEach((code) => dispatchEvent("keycancel", {
 		code
 	}))
-	keysDown.length = 0
 	poisoned = false
 }
 
