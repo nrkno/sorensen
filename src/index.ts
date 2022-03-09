@@ -113,7 +113,7 @@ export const VIRTUAL_ANY_POSITION_KEYS: Record<string, string[]> = {
 	Ctrl: ['ControlLeft', 'ControlRight'],
 	Alt: ['AltLeft', 'AltRight'],
 	Meta: ['MetaLeft', 'MetaRight'],
-	AnyEnter: ['Enter'],
+	AnyEnter: ['Enter', 'NumpadEnter'],
 	Option: ['AltLeft', 'AltRight'],
 	Command: ['OSLeft', 'OSRight'],
 	Windows: ['OSLeft', 'OSRight'],
