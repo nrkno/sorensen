@@ -53,4 +53,4 @@ Additionally, Sørensen allows special, "virtual" codes, for conveniance when us
 | `Option`     | `AltLeft`, `AltRight`                                                             |
 | `Command`    | `OSLeft`, `OSRight`                                                               |
 | `Windows`    | `OSLeft`, `OSRight`                                                               |
-| `Accel`      | on a Mac-like sytstem: `OSLeft`, `OSRight`, others: `ControlLeft`, `ControlRight` |
+| `Accel`      | on a Mac-like system: `OSLeft`, `OSRight`, others: `ControlLeft`, `ControlRight`  |

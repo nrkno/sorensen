@@ -576,6 +576,85 @@ describe('Sørensen.bind', () => {
 				})
 			})
 		})
+
+		describe('metacodes', () => {
+			it('Shift fires when pressing ShiftLeft and ShiftRight', async () => {
+				await bindCombo('Shift')
+				await expectToTrigger('Shift', 0)
+
+				await page.keyboard.press('ShiftLeft')
+				await expectToTrigger('Shift', 1)
+
+				await page.keyboard.press('ShiftRight')
+				await expectToTrigger('Shift', 2)
+			})
+
+			it('Ctrl fires when pressing ControlLeft and ControlRight', async () => {
+				await bindCombo('Ctrl')
+				await expectToTrigger('Ctrl', 0)
+
+				await page.keyboard.press('ControlLeft')
+				await expectToTrigger('Ctrl', 1)
+
+				await page.keyboard.press('ControlRight')
+				await expectToTrigger('Ctrl', 2)
+			})
+
+			it('Control fires when pressing ControlLeft and ControlRight', async () => {
+				await bindCombo('Control')
+				await expectToTrigger('Control', 0)
+
+				await page.keyboard.press('ControlLeft')
+				await expectToTrigger('Control', 1)
+
+				await page.keyboard.press('ControlRight')
+				await expectToTrigger('Control', 2)
+			})
+
+			it('Alt fires when pressing AltLeft and AltRight', async () => {
+				await bindCombo('Alt')
+				await expectToTrigger('Alt', 0)
+
+				await page.keyboard.press('AltLeft')
+				await expectToTrigger('Alt', 1)
+
+				await page.keyboard.press('AltRight')
+				await expectToTrigger('Alt', 2)
+			})
+
+			it('Meta fires when pressing MetaLeft and MetaRight', async () => {
+				await bindCombo('Meta')
+				await expectToTrigger('Meta', 0)
+
+				await page.keyboard.press('MetaLeft')
+				await expectToTrigger('Meta', 1)
+
+				await page.keyboard.press('MetaRight')
+				await expectToTrigger('Meta', 2)
+			})
+
+			it('AnyEnter fires when pressing Enter and NumpadEnter', async () => {
+				await bindCombo('AnyEnter')
+				await expectToTrigger('AnyEnter', 0)
+
+				await page.keyboard.press('Enter')
+				await expectToTrigger('AnyEnter', 1)
+
+				await page.keyboard.press('NumpadEnter')
+				await expectToTrigger('AnyEnter', 2)
+			})
+
+			it('Option fires when pressing AltLeft and AltRight', async () => {
+				await bindCombo('Option')
+				await expectToTrigger('Option', 0)
+
+				await page.keyboard.press('AltLeft')
+				await expectToTrigger('Option', 1)
+
+				await page.keyboard.press('AltRight')
+				await expectToTrigger('Option', 2)
+			})
+		})
 	})
 
 	describe('keyup', () => {
