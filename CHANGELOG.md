@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.2](https://github.com/nrkno/sorensen/compare/v1.3.1...v1.3.2) (2022-03-11)
+
+
+### Bug Fixes
+
+* AnyEnter doesn't fire on NumpadEnter ([#1](https://github.com/nrkno/sorensen/issues/1)) ([6fb3917](https://github.com/nrkno/sorensen/commit/6fb3917718d1a3333ffbe1da8ae728add179a6d6))
+
 ### [1.3.1](https://github.com/nrkno/sorensen/compare/v1.3.0...v1.3.1) (2022-03-02)
 
 
