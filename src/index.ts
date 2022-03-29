@@ -409,9 +409,6 @@ function registerPreventDefaultDownKey(_key: string, _e: KeyboardEvent) {
 		if (!chord.binding.preventDefaultDown) {
 			return
 		}
-		if (chord.binding.combo.length !== chord.note) {
-			return
-		}
 		matchNote(chord.binding.combo[chord.note], keysDown, chord.binding, ignoredKeys)
 	})
 	bound.forEach((binding) => {
