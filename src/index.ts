@@ -198,90 +198,95 @@ function unbind(combo: string, listener?: (e: EnchancedKeyboardEvent) => void, t
 function noteIncludesKey(combo: Note, key: string): boolean {
 	return (
 		combo.includes(key) ||
-		(key in INVERSE_VIRTUAL_ANY_POSITION_KEYS ? combo.includes(INVERSE_VIRTUAL_ANY_POSITION_KEYS[key]) : false)
+		(key in INVERSE_VIRTUAL_ANY_POSITION_KEYS && combo.includes(INVERSE_VIRTUAL_ANY_POSITION_KEYS[key]))
 	)
 }
 
 function matchNote(combo: Note, keysToMatch: string[], options: BindOptions, outIgnoredKeys: string[]): boolean {
-	let match = true
-	if (!!options?.ordered === false) {
-		for (let i = 0; i < combo.length; i++) {
-			const code = combo[i]
-			if (code in VIRTUAL_ANY_POSITION_KEYS) {
-				const alternatives = VIRTUAL_ANY_POSITION_KEYS[code]
-				let anyMatch = false
-				for (let j = 0; j < alternatives.length; j++) {
-					if (keysToMatch.includes(alternatives[j])) {
-						outIgnoredKeys.push(alternatives[j])
-						anyMatch = true
-						break
-					}
-				}
-				if (!anyMatch) {
-					match = false
-				}
-			} else {
-				if (!keysToMatch.includes(code)) {
-					match = false
-				} else {
-					outIgnoredKeys.push(code)
-				}
-			}
-		}
-	} else {
-		const modifiersFirst = options?.ordered === 'modifiersFirst'
-		let lastFound = -1
-		let lastFoundModifier = -1
-		for (let i = 0; i < combo.length; i++) {
-			const code = combo[i]
-			if (code in VIRTUAL_ANY_POSITION_KEYS) {
-				const alternatives = VIRTUAL_ANY_POSITION_KEYS[code]
-				let anyMatch = false
-				for (let j = 0; j < alternatives.length; j++) {
-					// we can start at lastFound, anything before that has already been processed
-					const idx = keysToMatch.indexOf(alternatives[j], lastFound + 1)
-					if (idx >= 0 && idx > lastFound) {
-						anyMatch = true
-						if (modifiersFirst && MODIFIER_KEYS.includes(alternatives[j])) {
-							lastFoundModifier = idx
-						} else {
-							lastFound = idx
-						}
-						outIgnoredKeys.push(alternatives[j])
-						break
-					}
-				}
-				if (!anyMatch) {
-					match = false
-				}
-			} else {
-				// we can start at lastFound, anything before that has already been processed
-				const idx = keysToMatch.indexOf(combo[i], lastFound + 1)
-				if (idx < 0 || idx <= lastFound) {
-					match = false
-					break
-				}
-				if (modifiersFirst && MODIFIER_KEYS.includes(combo[i])) {
-					lastFoundModifier = idx
-				} else {
-					lastFound = idx
-				}
-				outIgnoredKeys.push(combo[i])
-			}
+	const match = options.ordered
+		? matchNoteOrdered(combo, keysToMatch, options, outIgnoredKeys)
+		: matchNoteUnordered(combo, keysToMatch, options, outIgnoredKeys)
 
-			// If modifiersFirst, do not allow modifiers after other keys
-			if (modifiersFirst && lastFound >= 0 && lastFoundModifier > lastFound) {
-				match = false
-			}
-		}
-	}
-
-	if ((options?.exclusive ?? true) && keysToMatch.length !== combo.length) {
+	if ((options.exclusive ?? true) && keysToMatch.length !== combo.length) {
 		return false
 	}
 
 	return match
 }
+
+function matchNoteOrdered(combo: Note, keysToMatch: string[], options: BindOptions, outIgnoredKeys: string[]): boolean {
+	const modifiersFirst = options?.ordered === 'modifiersFirst'
+	let lastFound = -1
+	let lastFoundModifier = -1
+	for (let i = 0; i < combo.length; i++) {
+		const code = combo[i]
+		if (code in VIRTUAL_ANY_POSITION_KEYS) {
+			const alternatives = VIRTUAL_ANY_POSITION_KEYS[code]
+			let anyMatch = false
+			for (let j = 0; j < alternatives.length; j++) {
+				// we can start at lastFound, anything before that has already been processed
+				const idx = keysToMatch.indexOf(alternatives[j], lastFound + 1)
+				if (idx >= 0 && idx > lastFound) {
+					anyMatch = true
+					if (modifiersFirst && MODIFIER_KEYS.includes(alternatives[j])) {
+						lastFoundModifier = idx
+					} else {
+						lastFound = idx
+					}
+					outIgnoredKeys.push(alternatives[j])
+					break
+				}
+			}
+			if (!anyMatch) {
+				return false
+			}
+		} else {
+			// we can start at lastFound, anything before that has already been processed
+			const idx = keysToMatch.indexOf(combo[i], lastFound + 1)
+			if (idx < 0 || idx <= lastFound) {
+				return false
+			}
+			if (modifiersFirst && MODIFIER_KEYS.includes(combo[i])) {
+				lastFoundModifier = idx
+			} else {
+				lastFound = idx
+			}
+			outIgnoredKeys.push(combo[i])
+		}
+
+		// If modifiersFirst, do not allow modifiers after other keys
+		if (modifiersFirst && lastFound >= 0 && lastFoundModifier > lastFound) {
+			return false
+		}
+	}
+	return true
+}
+
+function matchNoteUnordered(combo: Note, keysToMatch: string[], _options: BindOptions, outIgnoredKeys: string[]): boolean {
+	for (let i = 0; i < combo.length; i++) {
+		const code = combo[i]
+		if (code in VIRTUAL_ANY_POSITION_KEYS) {
+			const alternatives = VIRTUAL_ANY_POSITION_KEYS[code]
+			let anyMatch = false
+			for (let j = 0; j < alternatives.length; j++) {
+				if (keysToMatch.includes(alternatives[j])) {
+					outIgnoredKeys.push(alternatives[j])
+					anyMatch = true
+					break
+				}
+			}
+			if (!anyMatch) {
+				return false
+			}
+		} else if (!keysToMatch.includes(code)) {
+			return false
+		} else {
+			outIgnoredKeys.push(code)
+		}
+	}
+	return true
+}
+
 
 function isAllowedToExecute(binding: ComboBinding, e: KeyboardEvent): boolean {
 	if (
@@ -313,7 +318,7 @@ function callListenerIfAllowed(binding: ComboBinding, e: KeyboardEvent, note = 0
 					return
 				}
 				; (e as any)[SORENSEN_IMMEDIATE_PROPAGATION_STOPPED] = true
-					; (e as any)[SORENSEN_STOP_IMMEDIATE_PROPAGATION]()
+				; (e as any)[SORENSEN_STOP_IMMEDIATE_PROPAGATION]()
 			},
 		})
 	)
