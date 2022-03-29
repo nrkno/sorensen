@@ -1,4 +1,4 @@
-/// <referece path="dom.KeyboardMapAPI.ts" />
+/// <reference path="dom.KeyboardMapAPI.d.ts" />
 
 let initialized = false
 
@@ -75,13 +75,13 @@ export interface BindOptions {
 	/**
 	 * Assign any variable to the binding. This will be returned to the event listener as a part of the event object.
 	 */
-	tag?: any | undefined
+	tag?: any
 
 	/**
-	 * Prevent default behavior on any partial matches and key repeats
+	 * Prevent default behavior on any partial matches and key repeats.
 	 * Default: `true`
 	 */
-	preventDefaultPartials?: boolean
+	 preventDefaultPartials?: boolean
 
 	/**
 	 * Insert this binding at the top of the bindings list, allowing it to prevent other bindings from running by
@@ -292,9 +292,7 @@ function isAllowedToExecute(binding: ComboBinding, e: KeyboardEvent): boolean {
 	) {
 		return false
 	} else if (typeof binding.global === 'function') {
-		if (!binding.global(e, stringifyCombo(binding.combo))) {
-			return false
-		}
+		return binding.global(e, stringifyCombo(binding.combo))
 	}
 	return true
 }
@@ -333,9 +331,9 @@ function visitBoundCombos(key: string, up: boolean, e: KeyboardEvent) {
 		const ignoredKeys: string[] = []
 		if (
 			matchNote(binding.combo[0], up ? [...keysDown, key] : keysDown, binding, ignoredKeys) &&
-			(binding.up || false) === up
+			(binding.up ?? false) === up
 		) {
-			if (chordsInProgressCount === 0 || binding.exclusive === false) {
+				if (chordsInProgressCount === 0 || binding.exclusive === false) {
 				if (binding.combo.length === 1) {
 					// DEBUG: console.log(binding, chordsInProgress, binding.exclusive)
 					callListenerIfAllowed(binding, e, 0)
@@ -357,38 +355,38 @@ function visitChordsInProgress(key: string, up: boolean, e: KeyboardEvent) {
 	const notInProgress: ChordInProgress[] = []
 	// DEBUG: console.log(chordsInProgress)
 	chordsInProgress.forEach((chord) => {
-		if ((chord.binding.up || false) === up) {
-			if (chord.binding.combo.length > chord.note) {
-				const ignoredKeys: string[] = []
-				if (
-					matchNote(chord.binding.combo[chord.note], up ? [...keysDown, key] : keysDown, chord.binding, ignoredKeys)
-				) {
-					chord.note = chord.note + 1
-					// DEBUG: console.log('Did match', chord)
-					if (chord.binding.combo.length === chord.note) {
-						// DEBUG: console.log('Executing', chord)
-						callListenerIfAllowed(chord.binding, e, chord.note)
-						return // do not set up a new timeout for the chord
-					}
-					keyUpIgnoreKeys = [...keyUpIgnoreKeys, ...keysDown]
-				} else if (up && keyUpIgnoreKeys.includes(key)) {
-					keyUpIgnoreKeys = keyUpIgnoreKeys.filter((ignoreKey) => ignoreKey !== key)
-					// DEBUG: console.log('Ignored key ticked off', key, keyUpIgnoreKeys)
-				} else if (
-					!noteIncludesKey(chord.binding.combo[chord.note], key) &&
-					(chord.binding.modifiersPoisonChord || !MODIFIER_KEYS.includes(key))
-				) {
-					// DEBUG: console.log('No match', chord)
-					notInProgress.push(chord)
-				}
-				insertKeyRepeatIgnoreKeys(chord.binding, e, ignoredKeys)
-			} else {
-				// DEBUG: console.log('Too short', chord)
-				notInProgress.push(chord)
-			}
-		} else {
+		if ((chord.binding.up ?? false) !== up) {
 			// DEBUG: console.log('Wrong direction: ', up)
+			return
 		}
+		if (chord.binding.combo.length <= chord.note) {
+			// DEBUG: console.log('Too short', chord)
+			notInProgress.push(chord)
+			return
+		}
+		const ignoredKeys: string[] = []
+		if (
+			matchNote(chord.binding.combo[chord.note], up ? [...keysDown, key] : keysDown, chord.binding, ignoredKeys)
+		) {
+			chord.note = chord.note + 1
+			// DEBUG: console.log('Did match', chord)
+			if (chord.binding.combo.length === chord.note) {
+				// DEBUG: console.log('Executing', chord)
+				callListenerIfAllowed(chord.binding, e, chord.note)
+				return // do not set up a new timeout for the chord
+			}
+			keyUpIgnoreKeys = [...keyUpIgnoreKeys, ...keysDown]
+		} else if (up && keyUpIgnoreKeys.includes(key)) {
+			keyUpIgnoreKeys = keyUpIgnoreKeys.filter((ignoreKey) => ignoreKey !== key)
+			// DEBUG: console.log('Ignored key ticked off', key, keyUpIgnoreKeys)
+		} else if (
+			!noteIncludesKey(chord.binding.combo[chord.note], key) &&
+			(chord.binding.modifiersPoisonChord || !MODIFIER_KEYS.includes(key))
+		) {
+			// DEBUG: console.log('No match', chord)
+			notInProgress.push(chord)
+		}
+		insertKeyRepeatIgnoreKeys(chord.binding, e, ignoredKeys)
 	})
 
 	chordsInProgress = chordsInProgress.filter((chord) => !notInProgress.includes(chord))
