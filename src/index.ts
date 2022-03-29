@@ -81,7 +81,13 @@ export interface BindOptions {
 	 * Prevent default behavior on any partial matches and key repeats.
 	 * Default: `true`
 	 */
-	 preventDefaultPartials?: boolean
+	preventDefaultPartials?: boolean
+
+	/**
+	 * Prevent default behavior on key down.
+	 * Default: `true`
+	 */
+	preventDefaultDown?: boolean 
 
 	/**
 	 * Insert this binding at the top of the bindings list, allowing it to prevent other bindings from running by
@@ -397,6 +403,29 @@ function visitChordsInProgress(key: string, up: boolean, e: KeyboardEvent) {
 	chordsInProgress = chordsInProgress.filter((chord) => !notInProgress.includes(chord))
 }
 
+function registerPreventDefaultDownKey(_key: string, _e: KeyboardEvent) {
+	const ignoredKeys: string[] = []
+	chordsInProgress.forEach((chord) => {
+		if (!chord.binding.preventDefaultDown) {
+			return
+		}
+		if (chord.binding.combo.length !== chord.note) {
+			return
+		}
+		matchNote(chord.binding.combo[chord.note], keysDown, chord.binding, ignoredKeys)
+	})
+	bound.forEach((binding) => {
+		if (!binding.preventDefaultDown) {
+			return
+		}
+		if (binding.combo.length !== 1) {
+			return
+		}
+		matchNote(binding.combo[0], keysDown, binding, ignoredKeys)
+	})
+	keyRepeatIgnoreKeys = [...keyRepeatIgnoreKeys, ...Array.from(new Set(ignoredKeys))]
+}
+
 function cleanUpFinishedChords() {
 	chordsInProgress = chordsInProgress.filter((chord) => chord.note < chord.binding.combo.length)
 }
@@ -479,6 +508,7 @@ function keyDown(e: KeyboardEvent) {
 			e = overloadEventStopImmediatePropagation(e)
 			visitChordsInProgress(e.code, false, e)
 			visitBoundCombos(e.code, false, e)
+			registerPreventDefaultDownKey(e.code, e)
 		}
 		cleanUpFinishedChords()
 		clearChordTimeout()
