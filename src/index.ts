@@ -87,7 +87,7 @@ export interface BindOptions {
 	 * Prevent default behavior on key down.
 	 * Default: `true`
 	 */
-	preventDefaultDown?: boolean 
+	preventDefaultDown?: boolean
 
 	/**
 	 * Insert this binding at the top of the bindings list, allowing it to prevent other bindings from running by
@@ -268,7 +268,12 @@ function matchNoteOrdered(combo: Note, keysToMatch: string[], options: BindOptio
 	return true
 }
 
-function matchNoteUnordered(combo: Note, keysToMatch: string[], _options: BindOptions, outIgnoredKeys: string[]): boolean {
+function matchNoteUnordered(
+	combo: Note,
+	keysToMatch: string[],
+	_options: BindOptions,
+	outIgnoredKeys: string[]
+): boolean {
 	for (let i = 0; i < combo.length; i++) {
 		const code = combo[i]
 		if (code in VIRTUAL_ANY_POSITION_KEYS) {
@@ -292,7 +297,6 @@ function matchNoteUnordered(combo: Note, keysToMatch: string[], _options: BindOp
 	}
 	return true
 }
-
 
 function isAllowedToExecute(binding: ComboBinding, e: KeyboardEvent): boolean {
 	if (
@@ -323,8 +327,8 @@ function callListenerIfAllowed(binding: ComboBinding, e: KeyboardEvent, note = 0
 				if ((e as any)[SORENSEN_IMMEDIATE_PROPAGATION_STOPPED]) {
 					return
 				}
-				; (e as any)[SORENSEN_IMMEDIATE_PROPAGATION_STOPPED] = true
-				; (e as any)[SORENSEN_STOP_IMMEDIATE_PROPAGATION]()
+				;(e as any)[SORENSEN_IMMEDIATE_PROPAGATION_STOPPED] = true
+				;(e as any)[SORENSEN_STOP_IMMEDIATE_PROPAGATION]()
 			},
 		})
 	)
@@ -344,7 +348,7 @@ function visitBoundCombos(key: string, up: boolean, e: KeyboardEvent) {
 			matchNote(binding.combo[0], up ? [...keysDown, key] : keysDown, binding, ignoredKeys) &&
 			(binding.up ?? false) === up
 		) {
-				if (chordsInProgressCount === 0 || binding.exclusive === false) {
+			if (chordsInProgressCount === 0 || binding.exclusive === false) {
 				if (binding.combo.length === 1) {
 					// DEBUG: console.log(binding, chordsInProgress, binding.exclusive)
 					callListenerIfAllowed(binding, e, 0)
@@ -376,9 +380,7 @@ function visitChordsInProgress(key: string, up: boolean, e: KeyboardEvent) {
 			return
 		}
 		const ignoredKeys: string[] = []
-		if (
-			matchNote(chord.binding.combo[chord.note], up ? [...keysDown, key] : keysDown, chord.binding, ignoredKeys)
-		) {
+		if (matchNote(chord.binding.combo[chord.note], up ? [...keysDown, key] : keysDown, chord.binding, ignoredKeys)) {
 			chord.note = chord.note + 1
 			// DEBUG: console.log('Did match', chord)
 			if (chord.binding.combo.length === chord.note) {
@@ -550,9 +552,11 @@ function clearPressedKeys(): void {
 	// inform potential listeners about cancelled keys
 	const cancelledKeys = keysDown.slice()
 	keysDown.length = 0
-	cancelledKeys.forEach((code) => dispatchEvent("keycancel", {
-		code
-	}))
+	cancelledKeys.forEach((code) =>
+		dispatchEvent('keycancel', {
+			code,
+		})
+	)
 	poisoned = false
 }
 
