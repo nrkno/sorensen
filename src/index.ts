@@ -405,7 +405,7 @@ function visitChordsInProgress(key: string, up: boolean, e: KeyboardEvent) {
 	chordsInProgress = chordsInProgress.filter((chord) => !notInProgress.includes(chord))
 }
 
-function registerPreventDefaultDownKey(_key: string, _e: KeyboardEvent) {
+function registerPreventDefaultDownKeys(_key: string, _e: KeyboardEvent) {
 	const ignoredKeys: string[] = []
 	chordsInProgress.forEach((chord) => {
 		if (!chord.binding.preventDefaultDown) {
@@ -507,7 +507,7 @@ function keyDown(e: KeyboardEvent) {
 			e = overloadEventStopImmediatePropagation(e)
 			visitChordsInProgress(e.code, false, e)
 			visitBoundCombos(e.code, false, e)
-			registerPreventDefaultDownKey(e.code, e)
+			registerPreventDefaultDownKeys(e.code, e)
 		}
 		cleanUpFinishedChords()
 		clearChordTimeout()
