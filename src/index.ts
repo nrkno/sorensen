@@ -411,7 +411,11 @@ function registerPreventDefaultDownKeys(_key: string, _e: KeyboardEvent) {
 		if (!chord.binding.preventDefaultDown) {
 			return
 		}
-		matchNote(chord.binding.combo[chord.note], keysDown, chord.binding, ignoredKeys)
+		const ignoredChordKeys: string[] = []
+		const matched = matchNote(chord.binding.combo[chord.note], keysDown, chord.binding, ignoredChordKeys)
+		if (matched) {
+			ignoredKeys.push(...ignoredChordKeys)
+		}
 	})
 	bound.forEach((binding) => {
 		if (!binding.preventDefaultDown) {
@@ -420,7 +424,11 @@ function registerPreventDefaultDownKeys(_key: string, _e: KeyboardEvent) {
 		if (binding.combo.length !== 1) {
 			return
 		}
-		matchNote(binding.combo[0], keysDown, binding, ignoredKeys)
+		const ignoredChordKeys: string[] = []
+		const matched = matchNote(binding.combo[0], keysDown, binding, ignoredChordKeys)
+		if (matched) {
+			ignoredKeys.push(...ignoredChordKeys)
+		}
 	})
 	keyRepeatIgnoreKeys = [...keyRepeatIgnoreKeys, ...Array.from(new Set(ignoredKeys))]
 }
