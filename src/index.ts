@@ -307,7 +307,7 @@ function isAllowedToExecute(binding: ComboBinding, e: KeyboardEvent): boolean {
 	) {
 		return false
 	} else if (typeof binding.global === 'function') {
-		return binding.global(e, stringifyCombo(binding.combo))
+		return !!binding.global(e, stringifyCombo(binding.combo))
 	}
 	return true
 }
