@@ -1,4 +1,4 @@
-import { bindCombo, expectToTrigger, resetAllCombos } from './utils/bindCombo'
+import { bindCombo, expectToBePrevented, expectToTrigger, resetAllCombos } from './utils/bindCombo'
 
 jest.setTimeout(300000)
 
@@ -786,6 +786,221 @@ describe('Sørensen.bind', () => {
 				await page.keyboard.up('KeyD')
 
 				await expectToTrigger('KeyA+KeyC KeyB+KeyD', 1)
+			})
+		})
+
+		describe('preventDefaultDown', () => {
+			beforeAll(async () => {
+				await bindCombo('Control+KeyD', { preventDefaultDown: true })
+				await bindCombo('KeyA+KeyB', { preventDefaultDown: true })
+				await bindCombo('Control+KeyC Shift+KeyD KeyE', { preventDefaultDown: true })
+			})
+
+			it('Control+KeyD does trigger preventDefault', async () => {
+				await expectToTrigger('Control+KeyD', 0)
+				await expectToBePrevented('Control+KeyD', 0)
+
+				await page.keyboard.down('Control')
+				await expectToTrigger('Control+KeyD', 0)
+				await expectToBePrevented('Control+KeyD', 0)
+				await page.keyboard.down('KeyD')
+				await expectToTrigger('Control+KeyD', 1)
+				await expectToBePrevented('Control+KeyD', 1)
+
+				await page.keyboard.up('Control')
+				await page.keyboard.up('KeyD')
+				await expectToTrigger('Control+KeyD', 1)
+				await expectToBePrevented('Control+KeyD', 1)
+
+				await page.keyboard.down('Control')
+				await expectToTrigger('Control+KeyD', 1)
+				await expectToBePrevented('Control+KeyD', 1)
+				await page.keyboard.down('KeyD')
+				await expectToTrigger('Control+KeyD', 2)
+				await expectToBePrevented('Control+KeyD', 2)
+
+				await page.keyboard.up('Control')
+				await page.keyboard.up('KeyD')
+				await expectToTrigger('Control+KeyD', 2)
+				await expectToBePrevented('Control+KeyD', 2)
+			})
+
+			it('KeyA+KeyB does trigger preventDefault', async () => {
+				await expectToTrigger('KeyA+KeyB', 0)
+				await expectToBePrevented('KeyA+KeyB', 0)
+
+				await page.keyboard.down('KeyA')
+				await expectToTrigger('KeyA+KeyB', 0)
+				await expectToBePrevented('KeyA+KeyB', 0)
+				await page.keyboard.down('KeyB')
+				await expectToTrigger('KeyA+KeyB', 1)
+				await expectToBePrevented('KeyA+KeyB', 1)
+
+				await page.keyboard.up('KeyA')
+				await page.keyboard.up('KeyB')
+				await expectToTrigger('KeyA+KeyB', 1)
+				await expectToBePrevented('KeyA+KeyB', 1)
+
+				await page.keyboard.down('KeyA')
+				await expectToTrigger('KeyA+KeyB', 1)
+				await expectToBePrevented('KeyA+KeyB', 1)
+				await page.keyboard.down('KeyB')
+				await expectToTrigger('KeyA+KeyB', 2)
+				await expectToBePrevented('KeyA+KeyB', 2)
+
+				await page.keyboard.up('KeyA')
+				await page.keyboard.up('KeyB')
+				await expectToTrigger('KeyA+KeyB', 2)
+				await expectToBePrevented('KeyA+KeyB', 2)
+			})
+
+			it('Control+KeyC Shift+KeyD KeyE does trigger preventDefault', async () => {
+				await expectToTrigger('Control+KeyC Shift+KeyD KeyE', 0)
+				await expectToBePrevented('Control+KeyC Shift+KeyD KeyE', 0)
+
+				await page.keyboard.down('Control')
+				await page.keyboard.down('KeyC')
+				await page.keyboard.up('KeyC')
+				await page.keyboard.up('Control')
+
+				await page.keyboard.down('Shift')
+				await page.keyboard.down('KeyD')
+				await page.keyboard.up('KeyD')
+				await page.keyboard.up('Shift')
+
+				await page.keyboard.press('KeyE')
+				await expectToTrigger('Control+KeyC Shift+KeyD KeyE', 1)
+				await expectToBePrevented('Control+KeyC Shift+KeyD KeyE', 1)
+			})
+		})
+
+		describe('No preventDefaultDown', () => {
+			beforeAll(async () => {
+				await bindCombo('Control+KeyD')
+				await bindCombo('KeyA+KeyB')
+			})
+
+			it('Control+KeyD does not trigger preventDefault', async () => {
+				await expectToTrigger('Control+KeyD', 0)
+				await expectToBePrevented('Control+KeyD', 0)
+
+				await page.keyboard.down('Control')
+				await expectToTrigger('Control+KeyD', 0)
+				await expectToBePrevented('Control+KeyD', 0)
+				await page.keyboard.down('KeyD')
+				await expectToTrigger('Control+KeyD', 1)
+				await expectToBePrevented('Control+KeyD', 0)
+
+				await page.keyboard.up('Control')
+				await page.keyboard.up('KeyD')
+				await expectToTrigger('Control+KeyD', 1)
+				await expectToBePrevented('Control+KeyD', 0)
+
+				await page.keyboard.down('Control')
+				await expectToTrigger('Control+KeyD', 1)
+				await expectToBePrevented('Control+KeyD', 0)
+				await page.keyboard.down('KeyD')
+				await expectToTrigger('Control+KeyD', 2)
+				await expectToBePrevented('Control+KeyD', 0)
+
+				await page.keyboard.up('Control')
+				await page.keyboard.up('KeyD')
+				await expectToTrigger('Control+KeyD', 2)
+				await expectToBePrevented('Control+KeyD', 0)
+			})
+
+			it('KeyA+KeyB does not trigger preventDefault', async () => {
+				await expectToTrigger('KeyA+KeyB', 0)
+				await expectToBePrevented('KeyA+KeyB', 0)
+
+				await page.keyboard.down('KeyA')
+				await expectToTrigger('KeyA+KeyB', 0)
+				await expectToBePrevented('KeyA+KeyB', 0)
+				await page.keyboard.down('KeyB')
+				await expectToTrigger('KeyA+KeyB', 1)
+				await expectToBePrevented('KeyA+KeyB', 0)
+
+				await page.keyboard.up('KeyA')
+				await page.keyboard.up('KeyB')
+				await expectToTrigger('KeyA+KeyB', 1)
+				await expectToBePrevented('KeyA+KeyB', 0)
+
+				await page.keyboard.down('KeyA')
+				await expectToTrigger('KeyA+KeyB', 1)
+				await expectToBePrevented('KeyA+KeyB', 0)
+				await page.keyboard.down('KeyB')
+				await expectToTrigger('KeyA+KeyB', 2)
+				await expectToBePrevented('KeyA+KeyB', 0)
+
+				await page.keyboard.up('KeyA')
+				await page.keyboard.up('KeyB')
+				await expectToTrigger('KeyA+KeyB', 2)
+				await expectToBePrevented('KeyA+KeyB', 0)
+			})
+		})
+
+		describe('Explicit no preventDefaultDown', () => {
+			beforeAll(async () => {
+				await bindCombo('Control+KeyD', { preventDefaultDown: false })
+				await bindCombo('KeyA+KeyB', { preventDefaultDown: false })
+			})
+
+			it('Control+KeyD does trigger preventDefault', async () => {
+				await expectToTrigger('Control+KeyD', 0)
+				await expectToBePrevented('Control+KeyD', 0)
+
+				await page.keyboard.down('Control')
+				await expectToTrigger('Control+KeyD', 0)
+				await expectToBePrevented('Control+KeyD', 0)
+				await page.keyboard.down('KeyD')
+				await expectToTrigger('Control+KeyD', 1)
+				await expectToBePrevented('Control+KeyD', 0)
+
+				await page.keyboard.up('Control')
+				await page.keyboard.up('KeyD')
+				await expectToTrigger('Control+KeyD', 1)
+				await expectToBePrevented('Control+KeyD', 0)
+
+				await page.keyboard.down('Control')
+				await expectToTrigger('Control+KeyD', 1)
+				await expectToBePrevented('Control+KeyD', 0)
+				await page.keyboard.down('KeyD')
+				await expectToTrigger('Control+KeyD', 2)
+				await expectToBePrevented('Control+KeyD', 0)
+
+				await page.keyboard.up('Control')
+				await page.keyboard.up('KeyD')
+				await expectToTrigger('Control+KeyD', 2)
+				await expectToBePrevented('Control+KeyD', 0)
+			})
+
+			it('KeyA+KeyB does not trigger preventDefault', async () => {
+				await expectToTrigger('KeyA+KeyB', 0)
+				await expectToBePrevented('KeyA+KeyB', 0)
+
+				await page.keyboard.down('KeyA')
+				await expectToTrigger('KeyA+KeyB', 0)
+				await expectToBePrevented('KeyA+KeyB', 0)
+				await page.keyboard.down('KeyB')
+				await expectToTrigger('KeyA+KeyB', 1)
+				await expectToBePrevented('KeyA+KeyB', 0)
+
+				await page.keyboard.up('KeyA')
+				await page.keyboard.up('KeyB')
+				await expectToTrigger('KeyA+KeyB', 1)
+				await expectToBePrevented('KeyA+KeyB', 0)
+
+				await page.keyboard.down('KeyA')
+				await expectToTrigger('KeyA+KeyB', 1)
+				await expectToBePrevented('KeyA+KeyB', 0)
+				await page.keyboard.down('KeyB')
+				await expectToTrigger('KeyA+KeyB', 2)
+				await expectToBePrevented('KeyA+KeyB', 0)
+
+				await page.keyboard.up('KeyA')
+				await page.keyboard.up('KeyB')
+				await expectToTrigger('KeyA+KeyB', 2)
+				await expectToBePrevented('KeyA+KeyB', 0)
 			})
 		})
 	})

@@ -22,6 +22,9 @@
 		<div class="hit">
 			<!-- Was activated? -->
 		</div>
+		<div class="defaultPrevented">
+			<!-- Was preventDefault called? -->
+		</div>
 	</div>
 </template>
 <h1>Sørensen test playground</h1>
@@ -82,6 +85,7 @@
 			const bindRow = template.content.cloneNode(true)
 			bindRow.querySelector('.combo').textContent = combo
 			bindRow.querySelector('.hit').textContent = (0).toString()
+			bindRow.querySelector('.defaultPrevented').textContent = (0).toString()
 			document.getElementById('result').appendChild(bindRow)
 			const inserted = document.getElementById('result').lastElementChild
 			inserted.dataset['combo'] = combo
@@ -91,6 +95,17 @@
 					const hitCell = inserted.querySelector('.hit')
 					hitCell.textContent = (Number(hitCell.textContent) || 0) + 1
 					hitCell.classList.add('hot')
+					const origPreventDefault = e.preventDefault
+					const defaultPreventedCell = inserted.querySelector('.defaultPrevented')
+					const nextDefaultPrevented = (Number(defaultPreventedCell.textContent) || 0) + Number(options.preventDefaultDown ?? false)
+					
+					e.preventDefault = () => {
+							if (e.defaultPreventedDown) {
+								defaultPreventedCell.textContent = nextDefaultPrevented
+							}
+							origPreventDefault.call(e)
+					}
+					defaultPreventedCell.classList.add('hot')
 					if (typeof clb === 'function') clb(e)
 				},
 				options
@@ -100,10 +115,12 @@
 		const resetState = (combo) => {
 			document.querySelector(`.binding[data-combo="${combo}"] .hit`).textContent = (0).toString()
 			document.querySelector(`.binding[data-combo="${combo}"] .hit`).classList.remove('hot')
+			document.querySelector(`.binding[data-combo="${combo}"] .defaultPrevented`).textContent = (0).toString()
+			document.querySelector(`.binding[data-combo="${combo}"] .defaultPrevented`).classList.remove('hot')
 		}
 
 		const resetAllStates = () => {
-			const allStates = document.querySelectorAll(`.binding .hit`)
+			const allStates = document.querySelectorAll(`.binding .hit, .binding .defaultPrevented`)
 			allStates.forEach((element) => {
 				element.textContent = (0).toString()
 				element.classList.remove('hot')

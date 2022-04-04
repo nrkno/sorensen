@@ -160,7 +160,7 @@ function bind(combo: string | string[], listener: (e: EnchancedKeyboardEvent) =>
 
 	combo.forEach((variant) => {
 		const item = parseCombo(variant)
-		if (!item.length || !item[0].length) {
+		if (!item?.length || !item[0].length) {
 			throw new Error('Combo needs to have at least a single key in it')
 		}
 		if (options?.prepend) {
@@ -405,15 +405,19 @@ function visitChordsInProgress(key: string, up: boolean, e: KeyboardEvent) {
 	chordsInProgress = chordsInProgress.filter((chord) => !notInProgress.includes(chord))
 }
 
-function registerPreventDefaultDownKeys(_key: string, _e: KeyboardEvent) {
+function registerPreventDefaultDownKeys(_key: string, e: KeyboardEvent) {
 	const ignoredKeys: string[] = []
 	chordsInProgress.forEach((chord) => {
 		if (!chord.binding.preventDefaultDown) {
 			return
 		}
+		if (chord.note > chord.binding.combo.length) {
+			return
+		}
 		const ignoredChordKeys: string[] = []
-		const matched = matchNote(chord.binding.combo[chord.note], keysDown, chord.binding, ignoredChordKeys)
+		const matched = matchNote(chord.binding.combo[chord.note - 1], keysDown, chord.binding, ignoredChordKeys)
 		if (matched) {
+			;(e as any).defaultPreventedDown = true
 			ignoredKeys.push(...ignoredChordKeys)
 		}
 	})
@@ -427,6 +431,7 @@ function registerPreventDefaultDownKeys(_key: string, _e: KeyboardEvent) {
 		const ignoredChordKeys: string[] = []
 		const matched = matchNote(binding.combo[0], keysDown, binding, ignoredChordKeys)
 		if (matched) {
+			;(e as any).defaultPreventedDown = true
 			ignoredKeys.push(...ignoredChordKeys)
 		}
 	})
@@ -510,7 +515,6 @@ function keyDown(e: KeyboardEvent) {
 	if (!e.repeat) {
 		keysDown.push(e.code)
 		// DEBUG: console.log(keysDown)
-
 		if (!poisoned) {
 			e = overloadEventStopImmediatePropagation(e)
 			visitChordsInProgress(e.code, false, e)
