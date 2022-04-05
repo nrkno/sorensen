@@ -68,7 +68,7 @@ describe('Window focus handling', () => {
 			await page.evaluate(() => window.dispatchEvent(new Event('blur')))
 
 			expect(await getPressedKeys()).toHaveLength(0)
-			expect(await page.$("#cancelled-keys").then((el) => el?.evaluate(el => el.innerHTML))).toBe(',KeyB')
+			expect(await page.$('#cancelled-keys').then((el) => el?.evaluate((el) => el.innerHTML))).toBe(',KeyB')
 			await page.evaluate(() => window.dispatchEvent(new Event('focus')))
 			await page.keyboard.up('KeyB')
 			await expectToTrigger('KeyB', 2)

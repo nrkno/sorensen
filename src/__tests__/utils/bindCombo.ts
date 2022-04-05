@@ -15,6 +15,12 @@ export async function expectToTrigger(combo: string, count: number) {
 	})
 }
 
+export async function expectToBePrevented(combo: string, count: number) {
+	await expectPuppet(page).toMatchElement(`#result .binding[data-combo="${combo}"] .defaultPrevented`, {
+		text: count.toString(),
+	})
+}
+
 export async function resetCombo(combo: string) {
 	await page.evaluate<string>(`resetState(${JSON.stringify(combo)})`)
 }

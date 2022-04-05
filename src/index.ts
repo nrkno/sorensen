@@ -1,4 +1,4 @@
-/// <referece path="dom.KeyboardMapAPI.ts" />
+/// <reference path="dom.KeyboardMapAPI.d.ts" />
 
 let initialized = false
 
@@ -75,13 +75,19 @@ export interface BindOptions {
 	/**
 	 * Assign any variable to the binding. This will be returned to the event listener as a part of the event object.
 	 */
-	tag?: any | undefined
+	tag?: any
 
 	/**
-	 * Prevent default behavior on any partial matches and key repeats
+	 * Prevent default behavior on any partial matches and key repeats.
 	 * Default: `true`
 	 */
 	preventDefaultPartials?: boolean
+
+	/**
+	 * Prevent default behavior on key down.
+	 * Default: `true`
+	 */
+	preventDefaultDown?: boolean
 
 	/**
 	 * Insert this binding at the top of the bindings list, allowing it to prevent other bindings from running by
@@ -154,7 +160,7 @@ function bind(combo: string | string[], listener: (e: EnchancedKeyboardEvent) =>
 
 	combo.forEach((variant) => {
 		const item = parseCombo(variant)
-		if (!item.length || !item[0].length) {
+		if (!item?.length || !item[0].length) {
 			throw new Error('Combo needs to have at least a single key in it')
 		}
 		if (options?.prepend) {
@@ -198,89 +204,98 @@ function unbind(combo: string, listener?: (e: EnchancedKeyboardEvent) => void, t
 function noteIncludesKey(combo: Note, key: string): boolean {
 	return (
 		combo.includes(key) ||
-		(key in INVERSE_VIRTUAL_ANY_POSITION_KEYS ? combo.includes(INVERSE_VIRTUAL_ANY_POSITION_KEYS[key]) : false)
+		(key in INVERSE_VIRTUAL_ANY_POSITION_KEYS && combo.includes(INVERSE_VIRTUAL_ANY_POSITION_KEYS[key]))
 	)
 }
 
 function matchNote(combo: Note, keysToMatch: string[], options: BindOptions, outIgnoredKeys: string[]): boolean {
-	let match = true
-	if (!!options?.ordered === false) {
-		for (let i = 0; i < combo.length; i++) {
-			const code = combo[i]
-			if (code in VIRTUAL_ANY_POSITION_KEYS) {
-				const alternatives = VIRTUAL_ANY_POSITION_KEYS[code]
-				let anyMatch = false
-				for (let j = 0; j < alternatives.length; j++) {
-					if (keysToMatch.includes(alternatives[j])) {
-						outIgnoredKeys.push(alternatives[j])
-						anyMatch = true
-						break
-					}
-				}
-				if (!anyMatch) {
-					match = false
-				}
-			} else {
-				if (!keysToMatch.includes(code)) {
-					match = false
-				} else {
-					outIgnoredKeys.push(code)
-				}
-			}
-		}
-	} else {
-		const modifiersFirst = options?.ordered === 'modifiersFirst'
-		let lastFound = -1
-		let lastFoundModifier = -1
-		for (let i = 0; i < combo.length; i++) {
-			const code = combo[i]
-			if (code in VIRTUAL_ANY_POSITION_KEYS) {
-				const alternatives = VIRTUAL_ANY_POSITION_KEYS[code]
-				let anyMatch = false
-				for (let j = 0; j < alternatives.length; j++) {
-					// we can start at lastFound, anything before that has already been processed
-					const idx = keysToMatch.indexOf(alternatives[j], lastFound + 1)
-					if (idx >= 0 && idx > lastFound) {
-						anyMatch = true
-						if (modifiersFirst && MODIFIER_KEYS.includes(alternatives[j])) {
-							lastFoundModifier = idx
-						} else {
-							lastFound = idx
-						}
-						outIgnoredKeys.push(alternatives[j])
-						break
-					}
-				}
-				if (!anyMatch) {
-					match = false
-				}
-			} else {
-				// we can start at lastFound, anything before that has already been processed
-				const idx = keysToMatch.indexOf(combo[i], lastFound + 1)
-				if (idx < 0 || idx <= lastFound) {
-					match = false
-					break
-				}
-				if (modifiersFirst && MODIFIER_KEYS.includes(combo[i])) {
-					lastFoundModifier = idx
-				} else {
-					lastFound = idx
-				}
-				outIgnoredKeys.push(combo[i])
-			}
+	const match = options.ordered
+		? matchNoteOrdered(combo, keysToMatch, options, outIgnoredKeys)
+		: matchNoteUnordered(combo, keysToMatch, options, outIgnoredKeys)
 
-			// If modifiersFirst, do not allow modifiers after other keys
-			if (modifiersFirst && lastFound >= 0 && lastFoundModifier > lastFound) {
-				match = false
-			}
-		}
-	}
-
-	if ((options?.exclusive ?? true) && keysToMatch.length !== combo.length) {
+	if ((options.exclusive ?? true) && keysToMatch.length !== combo.length) {
 		return false
 	}
 
 	return match
+}
+
+function matchNoteOrdered(combo: Note, keysToMatch: string[], options: BindOptions, outIgnoredKeys: string[]): boolean {
+	const modifiersFirst = options?.ordered === 'modifiersFirst'
+	let lastFound = -1
+	let lastFoundModifier = -1
+	for (let i = 0; i < combo.length; i++) {
+		const code = combo[i]
+		if (code in VIRTUAL_ANY_POSITION_KEYS) {
+			const alternatives = VIRTUAL_ANY_POSITION_KEYS[code]
+			let anyMatch = false
+			for (let j = 0; j < alternatives.length; j++) {
+				// we can start at lastFound, anything before that has already been processed
+				const idx = keysToMatch.indexOf(alternatives[j], lastFound + 1)
+				if (idx >= 0 && idx > lastFound) {
+					anyMatch = true
+					if (modifiersFirst && MODIFIER_KEYS.includes(alternatives[j])) {
+						lastFoundModifier = idx
+					} else {
+						lastFound = idx
+					}
+					outIgnoredKeys.push(alternatives[j])
+					break
+				}
+			}
+			if (!anyMatch) {
+				return false
+			}
+		} else {
+			// we can start at lastFound, anything before that has already been processed
+			const idx = keysToMatch.indexOf(combo[i], lastFound + 1)
+			if (idx < 0 || idx <= lastFound) {
+				return false
+			}
+			if (modifiersFirst && MODIFIER_KEYS.includes(combo[i])) {
+				lastFoundModifier = idx
+			} else {
+				lastFound = idx
+			}
+			outIgnoredKeys.push(combo[i])
+		}
+
+		// If modifiersFirst, do not allow modifiers after other keys
+		if (modifiersFirst && lastFound >= 0 && lastFoundModifier > lastFound) {
+			return false
+		}
+	}
+	return true
+}
+
+function matchNoteUnordered(
+	combo: Note,
+	keysToMatch: string[],
+	_options: BindOptions,
+	outIgnoredKeys: string[]
+): boolean {
+	for (let i = 0; i < combo.length; i++) {
+		const code = combo[i]
+		if (code in VIRTUAL_ANY_POSITION_KEYS) {
+			const alternatives = VIRTUAL_ANY_POSITION_KEYS[code]
+			let anyMatch = false
+			for (let j = 0; j < alternatives.length; j++) {
+				if (keysToMatch.includes(alternatives[j])) {
+					outIgnoredKeys.push(alternatives[j])
+					anyMatch = true
+					break
+				}
+			}
+			if (!anyMatch) {
+				return false
+			}
+		} else if (!keysToMatch.includes(code)) {
+			return false
+		} else {
+			outIgnoredKeys.push(code)
+		}
+	}
+	return true
 }
 
 function isAllowedToExecute(binding: ComboBinding, e: KeyboardEvent): boolean {
@@ -292,9 +307,7 @@ function isAllowedToExecute(binding: ComboBinding, e: KeyboardEvent): boolean {
 	) {
 		return false
 	} else if (typeof binding.global === 'function') {
-		if (!binding.global(e, stringifyCombo(binding.combo))) {
-			return false
-		}
+		return !!binding.global(e, stringifyCombo(binding.combo))
 	}
 	return true
 }
@@ -314,8 +327,8 @@ function callListenerIfAllowed(binding: ComboBinding, e: KeyboardEvent, note = 0
 				if ((e as any)[SORENSEN_IMMEDIATE_PROPAGATION_STOPPED]) {
 					return
 				}
-				; (e as any)[SORENSEN_IMMEDIATE_PROPAGATION_STOPPED] = true
-					; (e as any)[SORENSEN_STOP_IMMEDIATE_PROPAGATION]()
+				;(e as any)[SORENSEN_IMMEDIATE_PROPAGATION_STOPPED] = true
+				;(e as any)[SORENSEN_STOP_IMMEDIATE_PROPAGATION]()
 			},
 		})
 	)
@@ -333,7 +346,7 @@ function visitBoundCombos(key: string, up: boolean, e: KeyboardEvent) {
 		const ignoredKeys: string[] = []
 		if (
 			matchNote(binding.combo[0], up ? [...keysDown, key] : keysDown, binding, ignoredKeys) &&
-			(binding.up || false) === up
+			(binding.up ?? false) === up
 		) {
 			if (chordsInProgressCount === 0 || binding.exclusive === false) {
 				if (binding.combo.length === 1) {
@@ -357,41 +370,72 @@ function visitChordsInProgress(key: string, up: boolean, e: KeyboardEvent) {
 	const notInProgress: ChordInProgress[] = []
 	// DEBUG: console.log(chordsInProgress)
 	chordsInProgress.forEach((chord) => {
-		if ((chord.binding.up || false) === up) {
-			if (chord.binding.combo.length > chord.note) {
-				const ignoredKeys: string[] = []
-				if (
-					matchNote(chord.binding.combo[chord.note], up ? [...keysDown, key] : keysDown, chord.binding, ignoredKeys)
-				) {
-					chord.note = chord.note + 1
-					// DEBUG: console.log('Did match', chord)
-					if (chord.binding.combo.length === chord.note) {
-						// DEBUG: console.log('Executing', chord)
-						callListenerIfAllowed(chord.binding, e, chord.note)
-						return // do not set up a new timeout for the chord
-					}
-					keyUpIgnoreKeys = [...keyUpIgnoreKeys, ...keysDown]
-				} else if (up && keyUpIgnoreKeys.includes(key)) {
-					keyUpIgnoreKeys = keyUpIgnoreKeys.filter((ignoreKey) => ignoreKey !== key)
-					// DEBUG: console.log('Ignored key ticked off', key, keyUpIgnoreKeys)
-				} else if (
-					!noteIncludesKey(chord.binding.combo[chord.note], key) &&
-					(chord.binding.modifiersPoisonChord || !MODIFIER_KEYS.includes(key))
-				) {
-					// DEBUG: console.log('No match', chord)
-					notInProgress.push(chord)
-				}
-				insertKeyRepeatIgnoreKeys(chord.binding, e, ignoredKeys)
-			} else {
-				// DEBUG: console.log('Too short', chord)
-				notInProgress.push(chord)
-			}
-		} else {
+		if ((chord.binding.up ?? false) !== up) {
 			// DEBUG: console.log('Wrong direction: ', up)
+			return
 		}
+		if (chord.binding.combo.length <= chord.note) {
+			// DEBUG: console.log('Too short', chord)
+			notInProgress.push(chord)
+			return
+		}
+		const ignoredKeys: string[] = []
+		if (matchNote(chord.binding.combo[chord.note], up ? [...keysDown, key] : keysDown, chord.binding, ignoredKeys)) {
+			chord.note = chord.note + 1
+			// DEBUG: console.log('Did match', chord)
+			if (chord.binding.combo.length === chord.note) {
+				// DEBUG: console.log('Executing', chord)
+				callListenerIfAllowed(chord.binding, e, chord.note)
+				return // do not set up a new timeout for the chord
+			}
+			keyUpIgnoreKeys = [...keyUpIgnoreKeys, ...keysDown]
+		} else if (up && keyUpIgnoreKeys.includes(key)) {
+			keyUpIgnoreKeys = keyUpIgnoreKeys.filter((ignoreKey) => ignoreKey !== key)
+			// DEBUG: console.log('Ignored key ticked off', key, keyUpIgnoreKeys)
+		} else if (
+			!noteIncludesKey(chord.binding.combo[chord.note], key) &&
+			(chord.binding.modifiersPoisonChord || !MODIFIER_KEYS.includes(key))
+		) {
+			// DEBUG: console.log('No match', chord)
+			notInProgress.push(chord)
+		}
+		insertKeyRepeatIgnoreKeys(chord.binding, e, ignoredKeys)
 	})
 
 	chordsInProgress = chordsInProgress.filter((chord) => !notInProgress.includes(chord))
+}
+
+function registerPreventDefaultDownKeys(_key: string, e: KeyboardEvent) {
+	const ignoredKeys: string[] = []
+	chordsInProgress.forEach((chord) => {
+		if (!chord.binding.preventDefaultDown) {
+			return
+		}
+		if (chord.note > chord.binding.combo.length) {
+			return
+		}
+		const ignoredChordKeys: string[] = []
+		const matched = matchNote(chord.binding.combo[chord.note - 1], keysDown, chord.binding, ignoredChordKeys)
+		if (matched) {
+			;(e as any).defaultPreventedDown = true
+			ignoredKeys.push(...ignoredChordKeys)
+		}
+	})
+	bound.forEach((binding) => {
+		if (!binding.preventDefaultDown) {
+			return
+		}
+		if (binding.combo.length !== 1) {
+			return
+		}
+		const ignoredChordKeys: string[] = []
+		const matched = matchNote(binding.combo[0], keysDown, binding, ignoredChordKeys)
+		if (matched) {
+			;(e as any).defaultPreventedDown = true
+			ignoredKeys.push(...ignoredChordKeys)
+		}
+	})
+	keyRepeatIgnoreKeys = [...keyRepeatIgnoreKeys, ...Array.from(new Set(ignoredKeys))]
 }
 
 function cleanUpFinishedChords() {
@@ -471,11 +515,11 @@ function keyDown(e: KeyboardEvent) {
 	if (!e.repeat) {
 		keysDown.push(e.code)
 		// DEBUG: console.log(keysDown)
-
 		if (!poisoned) {
 			e = overloadEventStopImmediatePropagation(e)
 			visitChordsInProgress(e.code, false, e)
 			visitBoundCombos(e.code, false, e)
+			registerPreventDefaultDownKeys(e.code, e)
 		}
 		cleanUpFinishedChords()
 		clearChordTimeout()
@@ -520,9 +564,11 @@ function clearPressedKeys(): void {
 	// inform potential listeners about cancelled keys
 	const cancelledKeys = keysDown.slice()
 	keysDown.length = 0
-	cancelledKeys.forEach((code) => dispatchEvent("keycancel", {
-		code
-	}))
+	cancelledKeys.forEach((code) =>
+		dispatchEvent('keycancel', {
+			code,
+		})
+	)
 	poisoned = false
 }
 
