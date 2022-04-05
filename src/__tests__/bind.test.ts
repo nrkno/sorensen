@@ -945,7 +945,7 @@ describe('Sørensen.bind', () => {
 				await bindCombo('KeyA+KeyB', { preventDefaultDown: false })
 			})
 
-			it('Control+KeyD does trigger preventDefault', async () => {
+			it('Control+KeyD does not trigger preventDefault', async () => {
 				await expectToTrigger('Control+KeyD', 0)
 				await expectToBePrevented('Control+KeyD', 0)
 
