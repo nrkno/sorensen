@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.4.1](https://github.com/nrkno/sorensen/compare/v1.4.0...v1.4.1) (2022-04-08)
+
+## [1.4.0](https://github.com/nrkno/sorensen/compare/v1.3.2...v1.4.0) (2022-04-05)
+
+
+### Features
+
+* add `preventDefaultDown` option - prevent default behavior on `down` events for an `up` Combo. ([#2](https://github.com/nrkno/sorensen/issues/2)) ([d68b968](https://github.com/nrkno/sorensen/commit/d68b96871ee82a2578d839393969047f3152834b))
+
 ### [1.3.2](https://github.com/nrkno/sorensen/compare/v1.3.1...v1.3.2) (2022-03-11)
 
 
