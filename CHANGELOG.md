@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.4.2](https://github.com/nrkno/sorensen/compare/v1.4.1...v1.4.2) (2022-05-05)
+
+
+### Bug Fixes
+
+* `preventDefaultDown` does not respect `global` flag ([#3](https://github.com/nrkno/sorensen/issues/3)) ([fd71948](https://github.com/nrkno/sorensen/commit/fd719486679d0963df562c238658e09d12eea2a8))
+
 ### [1.4.1](https://github.com/nrkno/sorensen/compare/v1.4.0...v1.4.1) (2022-04-08)
 
 ## [1.4.0](https://github.com/nrkno/sorensen/compare/v1.3.2...v1.4.0) (2022-04-05)
