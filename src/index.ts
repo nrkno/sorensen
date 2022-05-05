@@ -411,6 +411,9 @@ function registerPreventDefaultDownKeys(_key: string, e: KeyboardEvent) {
 		if (!chord.binding.preventDefaultDown) {
 			return
 		}
+		if (!isAllowedToExecute(chord.binding, e)) {
+			return
+		}
 		if (chord.note > chord.binding.combo.length) {
 			return
 		}
@@ -423,6 +426,9 @@ function registerPreventDefaultDownKeys(_key: string, e: KeyboardEvent) {
 	})
 	bound.forEach((binding) => {
 		if (!binding.preventDefaultDown) {
+			return
+		}
+		if (!isAllowedToExecute(binding, e)) {
 			return
 		}
 		if (binding.combo.length !== 1) {
