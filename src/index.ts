@@ -201,31 +201,31 @@ function unbind(combo: string, listener?: (e: EnchancedKeyboardEvent) => void, t
 	bound = bound.filter((binding) => !bindingsToUnbind.includes(binding))
 }
 
-function noteIncludesKey(combo: Note, key: string): boolean {
+function noteIncludesKey(note: Note, key: string): boolean {
 	return (
-		combo.includes(key) ||
-		(key in INVERSE_VIRTUAL_ANY_POSITION_KEYS && combo.includes(INVERSE_VIRTUAL_ANY_POSITION_KEYS[key]))
+		note.includes(key) ||
+		(key in INVERSE_VIRTUAL_ANY_POSITION_KEYS && note.includes(INVERSE_VIRTUAL_ANY_POSITION_KEYS[key]))
 	)
 }
 
-function matchNote(combo: Note, keysToMatch: string[], options: BindOptions, outIgnoredKeys: string[]): boolean {
+function matchNote(note: Note, keysToMatch: string[], options: BindOptions, outIgnoredKeys: string[]): boolean {
 	const match = options.ordered
-		? matchNoteOrdered(combo, keysToMatch, options, outIgnoredKeys)
-		: matchNoteUnordered(combo, keysToMatch, options, outIgnoredKeys)
+		? matchNoteOrdered(note, keysToMatch, options, outIgnoredKeys)
+		: matchNoteUnordered(note, keysToMatch, options, outIgnoredKeys)
 
-	if ((options.exclusive ?? true) && keysToMatch.length !== combo.length) {
+	if ((options.exclusive ?? true) && keysToMatch.length !== note.length) {
 		return false
 	}
 
 	return match
 }
 
-function matchNoteOrdered(combo: Note, keysToMatch: string[], options: BindOptions, outIgnoredKeys: string[]): boolean {
+function matchNoteOrdered(note: Note, keysToMatch: string[], options: BindOptions, outIgnoredKeys: string[]): boolean {
 	const modifiersFirst = options?.ordered === 'modifiersFirst'
 	let lastFound = -1
 	let lastFoundModifier = -1
-	for (let i = 0; i < combo.length; i++) {
-		const code = combo[i]
+	for (let i = 0; i < note.length; i++) {
+		const code = note[i]
 		if (code in VIRTUAL_ANY_POSITION_KEYS) {
 			const alternatives = VIRTUAL_ANY_POSITION_KEYS[code]
 			let anyMatch = false
@@ -248,16 +248,16 @@ function matchNoteOrdered(combo: Note, keysToMatch: string[], options: BindOptio
 			}
 		} else {
 			// we can start at lastFound, anything before that has already been processed
-			const idx = keysToMatch.indexOf(combo[i], lastFound + 1)
+			const idx = keysToMatch.indexOf(note[i], lastFound + 1)
 			if (idx < 0 || idx <= lastFound) {
 				return false
 			}
-			if (modifiersFirst && MODIFIER_KEYS.includes(combo[i])) {
+			if (modifiersFirst && MODIFIER_KEYS.includes(note[i])) {
 				lastFoundModifier = idx
 			} else {
 				lastFound = idx
 			}
-			outIgnoredKeys.push(combo[i])
+			outIgnoredKeys.push(note[i])
 		}
 
 		// If modifiersFirst, do not allow modifiers after other keys
@@ -269,13 +269,13 @@ function matchNoteOrdered(combo: Note, keysToMatch: string[], options: BindOptio
 }
 
 function matchNoteUnordered(
-	combo: Note,
+	note: Note,
 	keysToMatch: string[],
 	_options: BindOptions,
 	outIgnoredKeys: string[]
 ): boolean {
-	for (let i = 0; i < combo.length; i++) {
-		const code = combo[i]
+	for (let i = 0; i < note.length; i++) {
+		const code = note[i]
 		if (code in VIRTUAL_ANY_POSITION_KEYS) {
 			const alternatives = VIRTUAL_ANY_POSITION_KEYS[code]
 			let anyMatch = false
@@ -411,6 +411,9 @@ function registerPreventDefaultDownKeys(_key: string, e: KeyboardEvent) {
 		if (!chord.binding.preventDefaultDown) {
 			return
 		}
+		if (!isAllowedToExecute(chord.binding, e)) {
+			return
+		}
 		if (chord.note > chord.binding.combo.length) {
 			return
 		}
@@ -423,6 +426,9 @@ function registerPreventDefaultDownKeys(_key: string, e: KeyboardEvent) {
 	})
 	bound.forEach((binding) => {
 		if (!binding.preventDefaultDown) {
+			return
+		}
+		if (!isAllowedToExecute(binding, e)) {
 			return
 		}
 		if (binding.combo.length !== 1) {
