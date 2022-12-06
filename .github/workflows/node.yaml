@@ -8,9 +8,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
       - name: Use Node.js 16.x
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: 16.x
       - name: Test in Chromium
@@ -33,11 +33,11 @@ jobs:
       - test
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Use Node.js 16.x
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: 16.x
       - name: Check release is desired
@@ -59,10 +59,10 @@ jobs:
             if verlt $PUBLISHED_VERSION $THIS_VERSION
             then
               echo "Publishing latest"
-              echo ::set-output name=tag::"latest"
+              echo "tag=latest" >> $GITHUB_OUTPUT
             else
               echo "Publishing hotfix"
-              echo ::set-output name=tag::"hotfix"
+              echo "tag=hotfix" >> $GITHUB_OUTPUT
             fi
 
           fi
