@@ -547,7 +547,7 @@ function windowBlur() {
 }
 
 async function getKeyboardLayoutMap() {
-	if ('keyboard' in navigator && typeof navigator.keyboard.getLayoutMap === 'function') {
+	if ('keyboard' in navigator && navigator.keyboard && typeof navigator.keyboard.getLayoutMap === 'function') {
 		try {
 			keyboardLayoutMap = await navigator.keyboard.getLayoutMap()
 			dispatchEvent('layoutchange')
@@ -658,7 +658,7 @@ async function init(options?: { chordTimeout?: number }) {
 		window.addEventListener('blur', windowBlur)
 		window.addEventListener('pagehide', windowBlur)
 
-		if ('keyboard' in navigator && typeof navigator.keyboard.addEventListener === 'function') {
+		if ('keyboard' in navigator && navigator.keyboard && typeof navigator.keyboard.addEventListener === 'function') {
 			navigator.keyboard.addEventListener('layoutchange', getKeyboardLayoutMap)
 		}
 		await getKeyboardLayoutMap()
@@ -685,7 +685,7 @@ async function destroy() {
 		window.removeEventListener('blur', windowBlur)
 		window.removeEventListener('pagehide', windowBlur)
 
-		if ('keyboard' in navigator && typeof navigator.keyboard.removeEventListener === 'function') {
+		if ('keyboard' in navigator && navigator.keyboard && typeof navigator.keyboard.removeEventListener === 'function') {
 			navigator.keyboard.removeEventListener('layoutchange', getKeyboardLayoutMap)
 		}
 
