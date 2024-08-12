@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.4.3](https://github.com/nrkno/sorensen/compare/v1.4.2...v1.4.3) (2024-08-12)
+
+
+### Bug Fixes
+
+* add additional check for navigator.keyboard ([87516cc](https://github.com/nrkno/sorensen/commit/87516cc22823931d680644bcbb24c4dde181a273))
+
 ### [1.4.2](https://github.com/nrkno/sorensen/compare/v1.4.1...v1.4.2) (2022-05-05)
 
 
