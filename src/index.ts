@@ -750,7 +750,7 @@ function removeEventListener(event: string, handler: EventHandler | EventHandler
 	}
 }
 
-const sorensen = {
+export const Sorensen = {
 	init,
 	destroy,
 	getCodeForKey,
@@ -763,11 +763,9 @@ const sorensen = {
 	removeEventListener,
 }
 
-export type Sorensen = typeof sorensen
-
 if (window) {
 	//@ts-ignore this is to work around a bug in webpack DevServer
-	window['sorensen'] = sorensen
+	window['sorensen'] = Sorensen
 }
 
-export default sorensen
+export default Sorensen
