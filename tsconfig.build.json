@@ -9,6 +9,9 @@
 			"*": ["./node_modules/*"],
 			"{{PACKAGE-NAME}}": ["./src/index.ts"]
 		},
+		"module": "UMD",
+		"lib": ["dom", "es6", "es2017"],
+		"esModuleInterop": true,
 		"types": []
 	}
 }
