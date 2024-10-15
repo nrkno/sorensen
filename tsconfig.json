@@ -4,10 +4,7 @@
 	"exclude": ["node_modules/**"],
 	"compilerOptions": {
 		"sourceMap": true,
-		"module": "UMD",
-		"lib": ["dom", "es6", "es2017"],
 		"types": ["jest", "@types/jest-environment-puppeteer"],
-		"esModuleInterop": true
 	},
 	"typedocOptions": {
 		"name": "Sørensen",

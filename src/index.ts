@@ -473,7 +473,7 @@ function overloadEventStopImmediatePropagation(e: KeyboardEvent) {
 	})
 }
 
-let chordTimeout: NodeJS.Timeout | undefined = undefined
+let chordTimeout: number | undefined = undefined
 function setupChordTimeout() {
 	clearChordTimeout()
 	if (CHORD_TIMEOUT > 0) {
