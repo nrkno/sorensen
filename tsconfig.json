@@ -12,6 +12,7 @@
 		"theme": "default",
 		"entryPoints": ["src/index.ts"],
 		"excludeExternals": true,
-		"externalPattern": "**/node_modules/**"
+		"externalPattern": "node_modules/**/*(.ts|.js)",
+		"exclude": "**/*+(.spec|.test).ts",
 	}
 }
