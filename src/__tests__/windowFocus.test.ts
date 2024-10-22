@@ -1,10 +1,13 @@
 import { bindCombo, expectToTrigger, getPressedKeys, resetAllCombos } from './utils/bindCombo'
+import { sleep } from './utils/sleep'
 
 jest.setTimeout(300000)
 
 describe('Window focus handling', () => {
 	beforeAll(async () => {
-		await Promise.all([page.goto('http://localhost:9000/index.html'), page.waitForNavigation()])
+		await page.goto('http://localhost:9000/index.html', {
+			waitUntil: 'domcontentloaded'
+		})
 
 		// this test requires exclusive control of the browser, so spin until we're the last test standing
 		while (true) {
@@ -12,11 +15,11 @@ describe('Window focus handling', () => {
 			if (targets.length < 2) {
 				break
 			}
-			await page.waitForTimeout(1000)
+			await sleep(1000)
 		}
 
 		await page.bringToFront()
-	})
+	}, 10000)
 
 	beforeEach(async () => {
 		await resetAllCombos()

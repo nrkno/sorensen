@@ -1,12 +1,12 @@
-import expectPuppet from 'expect-puppeteer'
+import { expect as expectPuppet} from 'expect-puppeteer'
 
 describe('Global object injection', () => {
 	beforeAll(async () => {
 		await Promise.all([page.goto('http://localhost:9000/index.html'), page.waitForNavigation()])
-	})
+	}, 10000)
 
 	it('should expose global object', async () => {
-		const mounted = await page.evaluate<string>('typeof window.sorensen.bind')
+		const mounted = await page.evaluate('typeof window.sorensen.bind')
 		expect(mounted).toBe('function')
 	})
 

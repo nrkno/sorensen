@@ -6,7 +6,9 @@
 <script>
 	requirejs(['sorensen'], function (sorensen) {
 		sorensen.init().then(() => {
-			document.getElementById('mounted').textContent = 'Sørensen is initialized'
+			const el = document.getElementById('mounted')
+			el.dataset['ready'] = true;
+			el.textContent = 'Sørensen is initialized'
 		})
 	})
 </script>

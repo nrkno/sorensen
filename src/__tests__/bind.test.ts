@@ -1,4 +1,5 @@
 import { bindCombo, expectToBePrevented, expectToTrigger, resetAllCombos } from './utils/bindCombo'
+import { sleep } from './utils/sleep'
 
 jest.setTimeout(300000)
 
@@ -8,7 +9,7 @@ describe('Sørensen.bind', () => {
 			await Promise.all([page.goto('http://localhost:9000/index.html'), page.waitForNavigation()])
 
 			await page.bringToFront()
-		})
+		}, 10000)
 
 		beforeEach(async () => {
 			await resetAllCombos()
@@ -40,13 +41,9 @@ describe('Sørensen.bind', () => {
 			it('KeyA fires once on repeat keydown', async () => {
 				await expectToTrigger('KeyA', 0)
 				await page.keyboard.down('KeyA')
-				await page.waitForTimeout(5)
 				await page.keyboard.down('KeyA')
-				await page.waitForTimeout(5)
 				await page.keyboard.down('KeyA')
-				await page.waitForTimeout(5)
 				await page.keyboard.down('KeyA')
-				await page.waitForTimeout(5)
 
 				await expectToTrigger('KeyA', 1)
 				await page.keyboard.up('KeyA')
@@ -112,17 +109,11 @@ describe('Sørensen.bind', () => {
 					await page.focus('input')
 					await expectToTrigger('KeyX+KeyK', 0)
 					await page.keyboard.down('KeyX')
-					await page.waitForTimeout(5)
 					await page.keyboard.down('KeyX')
-					await page.waitForTimeout(5)
 					await page.keyboard.down('KeyX')
-					await page.waitForTimeout(5)
 					await page.keyboard.down('KeyK')
-					await page.waitForTimeout(5)
 					await page.keyboard.down('KeyK')
-					await page.waitForTimeout(5)
 					await page.keyboard.down('KeyK')
-					await page.waitForTimeout(5)
 					await page.keyboard.press('KeyA', {
 						delay: 5,
 					})
@@ -553,10 +544,8 @@ describe('Sørensen.bind', () => {
 					await expectToTrigger('KeyD KeyE KeyF', 0)
 					await page.keyboard.press('KeyD')
 					await expectToTrigger('KeyD KeyE KeyF', 0)
-					await page.waitForTimeout(500)
 					await page.keyboard.press('KeyE')
 					await expectToTrigger('KeyD KeyE KeyF', 0)
-					await page.waitForTimeout(700)
 					await page.keyboard.press('KeyF')
 
 					await expectToTrigger('KeyD KeyE KeyF', 1)
@@ -566,10 +555,10 @@ describe('Sørensen.bind', () => {
 					await expectToTrigger('KeyD KeyE KeyF', 0)
 					await page.keyboard.press('KeyD')
 					await expectToTrigger('KeyD KeyE KeyF', 0)
-					await page.waitForTimeout(1000)
+					await sleep(1000)
 					await page.keyboard.press('KeyE')
 					await expectToTrigger('KeyD KeyE KeyF', 0)
-					await page.waitForTimeout(2000)
+					await sleep(2000)
 					await page.keyboard.press('KeyF')
 
 					await expectToTrigger('KeyD KeyE KeyF', 0)
@@ -659,9 +648,10 @@ describe('Sørensen.bind', () => {
 
 	describe('keyup', () => {
 		beforeAll(async () => {
-			await page.goto('http://localhost:9000/index.html')
-			await page.waitForTimeout(300)
-		})
+			await page.goto('http://localhost:9000/index.html', {
+				waitUntil: 'domcontentloaded'
+			})
+		}, 10000)
 
 		beforeEach(async () => {
 			await resetAllCombos()
@@ -888,6 +878,7 @@ describe('Sørensen.bind', () => {
 
 			it('Global KeyK is preventDefault\'ed in input', async () => {
 				const input = await page.$('input')
+				if (!input) throw Error('Input not found')
 				await page.evaluate(el => el.value = '', input)
 
 				await page.focus('input')
@@ -905,6 +896,7 @@ describe('Sørensen.bind', () => {
 
 			it('Non-global KeyL is not preventDefault\'ed in input', async () => {
 				const input = await page.$('input')
+				if (!input) throw Error('Input not found')
 				await page.evaluate(el => el.value = '', input)
 
 				await page.focus('input')

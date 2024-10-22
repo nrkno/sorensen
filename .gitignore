@@ -1,3 +1,4 @@
+.yarn/cache/**/*
 node_modules
 dist
 src/**.js

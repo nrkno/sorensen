@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node.js 16.x
+      - name: Use Node.js 18.x
         uses: actions/setup-node@v4
         with:
-          node-version: 16.x
+          node-version: 18.x
       - name: Test in Chromium
         run: |
           yarn
@@ -35,10 +35,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Use Node.js 16.x
+      - name: Use Node.js 18.x
         uses: actions/setup-node@v4
         with:
-          node-version: 16.x
+          node-version: 18.x
       - name: Check release is desired
         id: do-publish
         run: |

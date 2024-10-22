@@ -477,7 +477,7 @@ let chordTimeout: number | undefined = undefined
 function setupChordTimeout() {
 	clearChordTimeout()
 	if (CHORD_TIMEOUT > 0) {
-		chordTimeout = setTimeout(() => {
+		chordTimeout = window.setTimeout(() => {
 			chordsInProgress.length = 0
 		}, CHORD_TIMEOUT)
 	}
