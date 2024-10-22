@@ -2,10 +2,10 @@
   "name": "@sofie-automation/sorensen",
   "version": "1.5.0",
   "description": "A modern, i18n-friendly hotkey library for the Web",
-  "main": "dist/sorensen.js",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist/index.d.ts",
+    "dist",
     "README.md",
     "CHANGELOG.md"
   ],
@@ -69,5 +69,6 @@
     "webpack-dev-server": "5.1.0",
     "yargs": "^17.0.1"
   },
-  "prettier": "@sofie-automation/code-standard-preset/.prettierrc.json"
+  "prettier": "@sofie-automation/code-standard-preset/.prettierrc.json",
+  "packageManager": "yarn@3.8.6"
 }
