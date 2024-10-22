@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github.com/nrkno/sorensen/compare/v1.4.3...v1.5.0) (2024-10-22)
+
+
+### Features
+
+* add named export ([#11](https://github.com/nrkno/sorensen/issues/11)) ([f2007c6](https://github.com/nrkno/sorensen/commit/f2007c69c218f9632dd3188d7f6b6584ff76c899))
+
 ### [1.4.3](https://github.com/nrkno/sorensen/compare/v1.4.2...v1.4.3) (2024-08-12)
 
 
