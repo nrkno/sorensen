@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.5.1](https://github.com/nrkno/sorensen/compare/v1.5.0...v1.5.1) (2024-10-22)
+
+
+### Bug Fixes
+
+* broken publish ([#12](https://github.com/nrkno/sorensen/issues/12)) ([de67d07](https://github.com/nrkno/sorensen/commit/de67d071ac11a2da152fca9afdfd3b9e0f68b81d))
+
 ## [1.5.0](https://github.com/nrkno/sorensen/compare/v1.4.3...v1.5.0) (2024-10-22)
 
 
