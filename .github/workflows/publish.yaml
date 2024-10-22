@@ -15,9 +15,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18.x
+
+      - name: Prepare environment
+        run: |
+          corepack enable
+          yarn
+
       - name: Test in Chromium
         run: |
-          yarn
           yarn ci
         env:
           CI: true
@@ -54,6 +59,7 @@ jobs:
       - name: Prepare Environment
         if: ${{ steps.do-publish.outputs.publish }}
         run: |
+          corepack enable
           yarn install
           yarn build
         env:
