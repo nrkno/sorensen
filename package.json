@@ -69,5 +69,6 @@
     "webpack-dev-server": "5.1.0",
     "yargs": "^17.0.1"
   },
-  "prettier": "@sofie-automation/code-standard-preset/.prettierrc.json"
+  "prettier": "@sofie-automation/code-standard-preset/.prettierrc.json",
+  "packageManager": "yarn@3.8.6"
 }
