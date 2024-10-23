@@ -85,10 +85,14 @@ jobs:
       - name: Publish to NPM
         if: ${{ steps.do-publish.outputs.tag }}
         run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
-          echo "registry: https://registry.npmjs.org/" >> .yarnrc
-          yarn npm publish --access public --tag ${{ steps.do-publish.outputs.tag }}
+          yarn config set npmAuthToken $NPM_AUTH_TOKEN
+
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          yarn npm publish --access=public --tag ${{ steps.do-publish.outputs.tag }}
+
+          echo "**Published:** $NEW_VERSION" >> $GITHUB_STEP_SUMMARY
         env:
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           CI: true
       - name: Generate docs
         if: ${{ steps.do-publish.outputs.tag }} == 'latest'
