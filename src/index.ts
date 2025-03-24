@@ -7,7 +7,7 @@ let keyboardLayoutMap: KeyboardLayoutMap | undefined = undefined
 type Note = string[]
 type ComboChord = Note[]
 
-interface EnchancedKeyboardEvent extends KeyboardEvent {
+export interface EnchancedKeyboardEvent extends KeyboardEvent {
 	comboChordCodes: ComboChord
 	comboCodes: Note
 	tag: any | undefined
