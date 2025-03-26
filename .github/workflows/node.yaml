@@ -19,6 +19,10 @@ jobs:
           corepack enable
           yarn
 
+      - name: Disable AppArmor
+        # https://github.com/puppeteer/puppeteer/pull/13196
+        run: echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns
+
       - name: Test in Chromium
         run: |
           yarn ci
