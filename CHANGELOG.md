@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.5.10](https://github.com/nrkno/sorensen/compare/v1.5.9...v1.5.10) (2025-04-15)
+
+
+### Bug Fixes
+
+* ci tests ([7b73b92](https://github.com/nrkno/sorensen/commit/7b73b929943690aba3a6baa721c15fe09ee3ab98))
+
 ### [1.5.9](https://github.com/nrkno/sorensen/compare/v1.5.8...v1.5.9) (2025-03-24)
 
 ### [1.5.8](https://github.com/nrkno/sorensen/compare/v1.5.7...v1.5.8) (2024-10-23)
