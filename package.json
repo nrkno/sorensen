@@ -1,6 +1,6 @@
 {
   "name": "@sofie-automation/sorensen",
-  "version": "1.5.10",
+  "version": "1.5.11",
   "description": "A modern, i18n-friendly hotkey library for the Web",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
