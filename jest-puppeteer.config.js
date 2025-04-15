@@ -7,6 +7,7 @@ module.exports = {
 	server: {
 		command: 'yarn webpack serve --env test',
 		port: 9000,
+		launchTimeout: 10000,
 	},
 	browserContext: 'default',
 }

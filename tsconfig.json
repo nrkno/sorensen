@@ -4,10 +4,7 @@
 	"exclude": ["node_modules/**"],
 	"compilerOptions": {
 		"sourceMap": true,
-		"module": "UMD",
-		"lib": ["dom", "es6", "es2017"],
 		"types": ["jest", "@types/jest-environment-puppeteer"],
-		"esModuleInterop": true
 	},
 	"typedocOptions": {
 		"name": "Sørensen",
@@ -15,6 +12,7 @@
 		"theme": "default",
 		"entryPoints": ["src/index.ts"],
 		"excludeExternals": true,
-		"externalPattern": "**/node_modules/**"
+		"externalPattern": "node_modules/**/*(.ts|.js)",
+		"exclude": "**/*+(.spec|.test).ts",
 	}
 }

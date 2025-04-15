@@ -2,6 +2,50 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.5.11](https://github.com/nrkno/sorensen/compare/v1.5.10...v1.5.11) (2025-04-15)
+
+### [1.5.10](https://github.com/nrkno/sorensen/compare/v1.5.9...v1.5.10) (2025-04-15)
+
+
+### Bug Fixes
+
+* ci tests ([7b73b92](https://github.com/nrkno/sorensen/commit/7b73b929943690aba3a6baa721c15fe09ee3ab98))
+
+### [1.5.9](https://github.com/nrkno/sorensen/compare/v1.5.8...v1.5.9) (2025-03-24)
+
+### [1.5.8](https://github.com/nrkno/sorensen/compare/v1.5.7...v1.5.8) (2024-10-23)
+
+### [1.5.7](https://github.com/nrkno/sorensen/compare/v1.5.6...v1.5.7) (2024-10-23)
+
+### [1.5.6](https://github.com/nrkno/sorensen/compare/v1.5.5...v1.5.6) (2024-10-23)
+
+
+### Bug Fixes
+
+* update another CI script ([8ace870](https://github.com/nrkno/sorensen/commit/8ace8709414ab25149d2fab6624ed488455cee38))
+
+### [1.5.5](https://github.com/nrkno/sorensen/compare/v1.5.4...v1.5.5) (2024-10-23)
+
+### [1.5.4](https://github.com/nrkno/sorensen/compare/v1.5.3...v1.5.4) (2024-10-23)
+
+### [1.5.3](https://github.com/nrkno/sorensen/compare/v1.5.2...v1.5.3) (2024-10-22)
+
+### [1.5.2](https://github.com/nrkno/sorensen/compare/v1.5.1...v1.5.2) (2024-10-22)
+
+### [1.5.1](https://github.com/nrkno/sorensen/compare/v1.5.0...v1.5.1) (2024-10-22)
+
+
+### Bug Fixes
+
+* broken publish ([#12](https://github.com/nrkno/sorensen/issues/12)) ([de67d07](https://github.com/nrkno/sorensen/commit/de67d071ac11a2da152fca9afdfd3b9e0f68b81d))
+
+## [1.5.0](https://github.com/nrkno/sorensen/compare/v1.4.3...v1.5.0) (2024-10-22)
+
+
+### Features
+
+* add named export ([#11](https://github.com/nrkno/sorensen/issues/11)) ([f2007c6](https://github.com/nrkno/sorensen/commit/f2007c69c218f9632dd3188d7f6b6584ff76c899))
+
 ### [1.4.3](https://github.com/nrkno/sorensen/compare/v1.4.2...v1.4.3) (2024-08-12)
 
 

@@ -8,6 +8,9 @@ const libraryObjName = 'sorensen'
 module.exports = {
 	mode: env === 'dev' ? 'development' : 'production',
 	entry: __dirname + '/src/index.ts',
+	ignoreWarnings: [
+		/require function is used in a way/
+	],
 	output: {
 		path: path.join(__dirname, 'dist'),
 		filename: `${libraryName}.js`,
@@ -17,15 +20,16 @@ module.exports = {
 		umdNamedDefine: true,
 	},
 	devtool: 'source-map',
-	optimization: env === 'dev'
-		? {
-			minimize: false,
-			moduleIds: 'named',
-		}
-		: undefined,
+	optimization:
+		env === 'dev'
+			? {
+					minimize: false,
+					moduleIds: 'named',
+			  }
+			: undefined,
 	resolve: {
 		modules: [path.resolve('./node_modules'), path.resolve('./src')],
-		extensions: ['.js', '.ts', '.json']
+		extensions: ['.js', '.ts', '.json'],
 	},
 	module: {
 		rules: [
@@ -35,21 +39,20 @@ module.exports = {
 				use: {
 					loader: 'ts-loader',
 					options: {
-						transpileOnly: false
-					}
-				}
-			}
-		]
+						transpileOnly: false,
+					},
+				},
+			},
+		],
 	},
 	devServer: {
-		contentBase: [
-			path.join(__dirname, 'test'),
-		],
+		static: {
+			directory: path.join(__dirname, 'test'),
+			watch: true,
+		},
 		compress: true,
 		port: 9000,
-		open: env === 'test' ? false : true,
-		openPage: 'index.html',
-		watchContentBase: true,
-		filename: 'index.js'
+		open: env === 'test' ? false : ['/index.html'],
+		// filename: 'index.js'
 	},
 }
